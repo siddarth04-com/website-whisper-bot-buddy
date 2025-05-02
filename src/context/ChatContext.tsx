@@ -41,15 +41,15 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
   const [messages, setMessages] = useState<MessageType[]>([
     {
       id: '1',
-      content: 'Hi there! 👋 How can I help you today?',
+      content: 'Hi there! 👋 I\'m your travel assistant. How can I help with your travel plans today?',
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
   const [suggestedReplies, setSuggestedReplies] = useState<SuggestedReplyType[]>([
-    { id: '1', text: 'Tell me about your services' },
-    { id: '2', text: 'How can I contact you?' },
-    { id: '3', text: 'What are your business hours?' },
+    { id: '1', text: 'Popular destinations' },
+    { id: '2', text: 'Travel packages' },
+    { id: '3', text: 'Travel tips' },
   ]);
 
   const toggleChat = () => {
@@ -63,49 +63,88 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
   const generateBotResponse = (userMessage: string): { message: string; suggestions: SuggestedReplyType[] } => {
     const lowerCaseMsg = userMessage.toLowerCase();
     
-    // Simple response logic based on user's message
-    if (lowerCaseMsg.includes('service') || lowerCaseMsg.includes('offer')) {
+    // Travel-focused response logic
+    if (lowerCaseMsg.includes('destination') || lowerCaseMsg.includes('place') || lowerCaseMsg.includes('country') || lowerCaseMsg.includes('city')) {
       return {
-        message: 'We offer a wide range of services including web development, content creation, and digital marketing. Would you like to know more about any specific service?',
+        message: 'We have guides for popular destinations across Europe, Asia, Americas, and Africa. Would you like recommendations for a specific region?',
         suggestions: [
-          { id: '1', text: 'Web development details' },
-          { id: '2', text: 'Content creation services' },
-          { id: '3', text: 'Digital marketing packages' },
+          { id: '1', text: 'Europe destinations' },
+          { id: '2', text: 'Asia destinations' },
+          { id: '3', text: 'Americas destinations' },
         ],
       };
-    } else if (lowerCaseMsg.includes('contact') || lowerCaseMsg.includes('reach') || lowerCaseMsg.includes('email')) {
+    } else if (lowerCaseMsg.includes('package') || lowerCaseMsg.includes('deal') || lowerCaseMsg.includes('offer')) {
       return {
-        message: 'You can contact us via email at contact@example.com or call us at (123) 456-7890. Would you like us to get back to you?',
+        message: 'Our current travel packages include all-inclusive resort stays, adventure tours, and city exploration packages. Which type interests you?',
         suggestions: [
-          { id: '1', text: 'Request a callback' },
-          { id: '2', text: 'Send me your brochure' }
+          { id: '1', text: 'Resort packages' },
+          { id: '2', text: 'Adventure tours' },
+          { id: '3', text: 'City exploration' },
         ],
       };
-    } else if (lowerCaseMsg.includes('hour') || lowerCaseMsg.includes('open')) {
+    } else if (lowerCaseMsg.includes('tip') || lowerCaseMsg.includes('advice') || lowerCaseMsg.includes('recommendation')) {
       return {
-        message: 'Our business hours are Monday to Friday, 9 AM to 5 PM EST. How else can I assist you?',
+        message: 'Here are some general travel tips: always check visa requirements, pack essentials in your carry-on, and notify your bank about your travel plans. Would you like specific tips for a certain destination?',
         suggestions: [
-          { id: '1', text: 'Schedule a meeting' },
-          { id: '2', text: 'Weekend availability' }
+          { id: '1', text: 'Packing tips' },
+          { id: '2', text: 'Safety advice' },
+          { id: '3', text: 'Budget travel tips' },
         ],
       };
-    } else if (lowerCaseMsg.includes('price') || lowerCaseMsg.includes('cost') || lowerCaseMsg.includes('package')) {
+    } else if (lowerCaseMsg.includes('hotel') || lowerCaseMsg.includes('accommodation') || lowerCaseMsg.includes('stay')) {
       return {
-        message: 'Our pricing varies based on specific project requirements. Would you like a custom quote?',
+        message: 'We have partnerships with hotels, hostels, and vacation rentals worldwide. What type of accommodation are you looking for?',
         suggestions: [
-          { id: '1', text: 'Get a quote' },
-          { id: '2', text: 'View standard packages' }
+          { id: '1', text: 'Luxury hotels' },
+          { id: '2', text: 'Budget options' },
+          { id: '3', text: 'Unique stays' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('flight') || lowerCaseMsg.includes('airline') || lowerCaseMsg.includes('plane')) {
+      return {
+        message: 'For the best flight deals, I recommend booking 2-3 months in advance. Would you like tips on finding cheap flights or information about specific airlines?',
+        suggestions: [
+          { id: '1', text: 'Flight deals' },
+          { id: '2', text: 'Airline reviews' },
+          { id: '3', text: 'Airport guides' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('budget') || lowerCaseMsg.includes('cost') || lowerCaseMsg.includes('price')) {
+      return {
+        message: 'Travel budgets vary widely by destination. Southeast Asia tends to be budget-friendly, while destinations like Japan or Switzerland may require more spending. Do you have a specific budget range in mind?',
+        suggestions: [
+          { id: '1', text: 'Budget destinations' },
+          { id: '2', text: 'Money-saving tips' },
+          { id: '3', text: 'Luxury experiences' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('europe')) {
+      return {
+        message: 'Europe offers incredible diversity - from the romantic streets of Paris to the ancient ruins of Rome. Popular destinations include Italy, Spain, France, and Greece. Which European country interests you most?',
+        suggestions: [
+          { id: '1', text: 'Italy guide' },
+          { id: '2', text: 'Spain guide' },
+          { id: '3', text: 'France guide' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('asia')) {
+      return {
+        message: 'Asia is a fascinating continent with diverse cultures and landscapes. Popular destinations include Japan, Thailand, Vietnam, and Indonesia. Would you like information on a specific Asian country?',
+        suggestions: [
+          { id: '1', text: 'Japan guide' },
+          { id: '2', text: 'Thailand guide' },
+          { id: '3', text: 'Vietnam guide' },
         ],
       };
     }
     
     // Default response
     return {
-      message: "Thanks for your message! I'd be happy to help with any questions you have about our website, services, or company.",
+      message: "Thanks for reaching out! I can help with destination recommendations, travel packages, accommodation options, or travel tips. What aspect of your trip are you planning?",
       suggestions: [
-        { id: '1', text: 'Tell me about your company' },
-        { id: '2', text: 'What services do you offer?' },
-        { id: '3', text: 'How can I get started?' },
+        { id: '1', text: 'Destinations' },
+        { id: '2', text: 'Accommodation' },
+        { id: '3', text: 'Transportation' },
       ],
     };
   };

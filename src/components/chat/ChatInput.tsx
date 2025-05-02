@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChatContext, SuggestedReplyType } from '../../context/ChatContext';
-import { MessageCircle, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 const ChatInput: React.FC = () => {
   const { sendMessage, suggestedReplies } = useChatContext();
@@ -22,14 +22,14 @@ const ChatInput: React.FC = () => {
   };
 
   return (
-    <div className="border-t border-gray-200 p-4">
+    <div className="border-t border-gray-200 p-4 bg-white">
       {/* Suggested replies */}
       {suggestedReplies.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {suggestedReplies.map((reply) => (
             <button
               key={reply.id}
-              className="bg-white border border-gray-200 hover:bg-chat-button-hover text-sm rounded-full px-3 py-1 transition-colors"
+              className="bg-[#EBF8FF] border border-[#D3E4FD] hover:bg-[#D3E4FD] text-[#33C3F0] text-sm rounded-full px-3 py-1 transition-colors"
               onClick={() => handleSuggestedReply(reply)}
             >
               {reply.text}
@@ -43,10 +43,15 @@ const ChatInput: React.FC = () => {
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-grow"
+          placeholder="Ask about destinations, tips, etc..."
+          className="flex-grow border-[#D3E4FD] focus-visible:ring-[#33C3F0]"
         />
-        <Button type="submit" size="icon" className="bg-chat-primary hover:bg-chat-primary-dark">
+        <Button 
+          type="submit" 
+          size="icon" 
+          className="bg-[#33C3F0] hover:bg-[#2AB7E2]"
+          disabled={!message.trim()}
+        >
           <Send size={18} className="text-white" />
         </Button>
       </form>
