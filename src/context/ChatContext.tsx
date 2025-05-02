@@ -13,6 +13,15 @@ export type SuggestedReplyType = {
   text: string;
 };
 
+export type WeatherData = {
+  city: string;
+  temp: number;
+  description: string;
+  icon: string;
+  humidity: number;
+  windSpeed: number;
+};
+
 type ChatContextType = {
   isOpen: boolean;
   messages: MessageType[];
@@ -20,6 +29,7 @@ type ChatContextType = {
   toggleChat: () => void;
   sendMessage: (content: string) => void;
   closeChat: () => void;
+  weatherData: WeatherData | null;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -36,6 +46,9 @@ type Props = {
   children: ReactNode;
 };
 
+// Replace this with your actual API key
+const WEATHER_API_KEY = "YOUR_OPENWEATHERMAP_API_KEY"; 
+
 export const ChatProvider: React.FC<Props> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<MessageType[]>([
@@ -51,6 +64,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     { id: '2', text: 'Travel packages' },
     { id: '3', text: 'Travel tips' },
   ]);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -60,8 +74,64 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     setIsOpen(false);
   };
 
-  const generateBotResponse = (userMessage: string): { message: string; suggestions: SuggestedReplyType[] } => {
+  const fetchWeatherData = async (city: string): Promise<WeatherData | null> => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${WEATHER_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Weather data not found');
+      }
+      
+      const data = await response.json();
+      
+      return {
+        city: data.name,
+        temp: data.main.temp,
+        description: data.weather[0].description,
+        icon: data.weather[0].icon,
+        humidity: data.main.humidity,
+        windSpeed: data.wind.speed
+      };
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      return null;
+    }
+  };
+
+  const generateBotResponse = async (userMessage: string): Promise<{ message: string; suggestions: SuggestedReplyType[] }> => {
     const lowerCaseMsg = userMessage.toLowerCase();
+    
+    // Check for weather-related queries
+    const weatherRegex = /weather\s+(?:in|at|for)?\s+([a-zA-Z\s]+)/i;
+    const weatherMatch = userMessage.match(weatherRegex);
+    
+    if (lowerCaseMsg.includes('weather') && weatherMatch && weatherMatch[1]) {
+      const city = weatherMatch[1].trim();
+      const weather = await fetchWeatherData(city);
+      
+      if (weather) {
+        setWeatherData(weather);
+        return {
+          message: `Currently in ${weather.city}, it's ${weather.temp.toFixed(1)}°C with ${weather.description}. The humidity is ${weather.humidity}% and wind speed is ${weather.windSpeed} m/s. Would you like more information about ${weather.city} for your travels?`,
+          suggestions: [
+            { id: '1', text: `Things to do in ${weather.city}` },
+            { id: '2', text: `Best time to visit ${weather.city}` },
+            { id: '3', text: `${weather.city} travel tips` },
+          ],
+        };
+      } else {
+        return {
+          message: `I couldn't find weather information for "${city}". Could you please check the city name and try again?`,
+          suggestions: [
+            { id: '1', text: 'Weather in Paris' },
+            { id: '2', text: 'Weather in Tokyo' },
+            { id: '3', text: 'Weather in New York' },
+          ],
+        };
+      }
+    }
     
     // Travel-focused response logic
     if (lowerCaseMsg.includes('destination') || lowerCaseMsg.includes('place') || lowerCaseMsg.includes('country') || lowerCaseMsg.includes('city')) {
@@ -140,11 +210,11 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     // Default response
     return {
-      message: "Thanks for reaching out! I can help with destination recommendations, travel packages, accommodation options, or travel tips. What aspect of your trip are you planning?",
+      message: "Thanks for reaching out! I can help with destination recommendations, travel packages, accommodation options, or travel tips. I can also check the weather for any city - just ask 'What's the weather in [city]?'",
       suggestions: [
-        { id: '1', text: 'Destinations' },
-        { id: '2', text: 'Accommodation' },
-        { id: '3', text: 'Transportation' },
+        { id: '1', text: 'Weather in Paris' },
+        { id: '2', text: 'Popular destinations' },
+        { id: '3', text: 'Travel tips' },
       ],
     };
   };
@@ -163,8 +233,8 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     setMessages((prev) => [...prev, userMessage]);
     
     // Simulate bot thinking
-    setTimeout(() => {
-      const { message, suggestions } = generateBotResponse(content);
+    setTimeout(async () => {
+      const { message, suggestions } = await generateBotResponse(content);
       
       // Add bot response
       const botMessage: MessageType = {
@@ -186,6 +256,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     toggleChat,
     sendMessage,
     closeChat,
+    weatherData,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
