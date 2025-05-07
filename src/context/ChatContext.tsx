@@ -277,6 +277,25 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     // Update travel preferences based on the message
     updateTravelPreferences(userMessage);
     
+    // Handle "Popular destinations" suggestion
+    if (lowerCaseMsg === 'popular destinations' || 
+        lowerCaseMsg.includes('popular') && lowerCaseMsg.includes('destinations')) {
+      return {
+        message: "Here are some of the most popular travel destinations right now:\n\n" +
+                "1. Paris, France - The City of Light with iconic landmarks\n" +
+                "2. Tokyo, Japan - Ultramodern meets traditional\n" +
+                "3. Bali, Indonesia - Beautiful beaches and spiritual retreats\n" +
+                "4. Barcelona, Spain - Stunning architecture and vibrant culture\n" +
+                "5. New York, USA - The city that never sleeps\n\n" +
+                "Would you like more information about any of these places?",
+        suggestions: [
+          { id: '1', text: 'Tell me about Paris' },
+          { id: '2', text: 'Tell me about Tokyo' },
+          { id: '3', text: 'What are your travel preferences?' }
+        ]
+      };
+    }
+    
     // Check for weather-related queries
     const weatherRegex = /weather\s+(?:in|at|for)?\s+([a-zA-Z\s]+)/i;
     const weatherMatch = userMessage.match(weatherRegex);
@@ -344,7 +363,8 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     // Handle genre-specific queries
     if (lowerCaseMsg.includes('genre') || 
         lowerCaseMsg.includes('interest') || 
-        lowerCaseMsg.includes('type of trip')) {
+        lowerCaseMsg.includes('type of trip') ||
+        lowerCaseMsg.includes('what are your travel preferences')) {
       
       return {
         message: 'What type of travel experience are you looking for? I can recommend destinations based on different interests:',
@@ -397,7 +417,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     }
     
     // Process destination-specific queries
-    const destinationRegex = /(?:about|visit|travel to|go to)\s+([a-zA-Z\s,]+?)(?:\s|\?|$)/i;
+    const destinationRegex = /(?:about|visit|travel to|go to|tell me about)\s+([a-zA-Z\s,]+?)(?:\s|\?|$)/i;
     const destinationMatch = userMessage.match(destinationRegex);
     
     if (destinationMatch && destinationMatch[1]) {
@@ -432,17 +452,10 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       };
     }
     
-    // Continue with existing cases
-    if (lowerCaseMsg.includes('destination') || lowerCaseMsg.includes('place') || lowerCaseMsg.includes('country') || lowerCaseMsg.includes('city')) {
-      return {
-        message: 'We have guides for popular destinations across Europe, Asia, Americas, and Africa. Would you like recommendations for a specific region?',
-        suggestions: [
-          { id: '1', text: 'Europe destinations' },
-          { id: '2', text: 'Asia destinations' },
-          { id: '3', text: 'Americas destinations' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('package') || lowerCaseMsg.includes('deal') || lowerCaseMsg.includes('offer')) {
+    // Handle specific topic queries
+    
+    // Travel packages
+    if (lowerCaseMsg === 'travel packages' || lowerCaseMsg.includes('package') || lowerCaseMsg.includes('deal') || lowerCaseMsg.includes('offer')) {
       return {
         message: 'We offer various travel packages based on your preferences. Would you like to explore packages for:',
         suggestions: [
@@ -451,7 +464,10 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
           { id: '3', text: 'Adventure tours' },
         ],
       };
-    } else if (lowerCaseMsg.includes('tip') || lowerCaseMsg.includes('advice') || lowerCaseMsg.includes('recommendation')) {
+    }
+    
+    // Travel tips
+    if (lowerCaseMsg === 'travel tips' || lowerCaseMsg.includes('tip') || lowerCaseMsg.includes('advice') || lowerCaseMsg.includes('recommendation')) {
       return {
         message: 'Here are some general travel tips:\n\n• Book flights and accommodations in advance for better rates\n• Get travel insurance for peace of mind\n• Pack light and smart\n• Research local customs and phrases\n• Have a mix of payment methods\n\nWhat specific travel advice are you looking for?',
         suggestions: [
@@ -460,25 +476,10 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
           { id: '3', text: 'Budget travel tips' },
         ],
       };
-    } else if (lowerCaseMsg.includes('hotel') || lowerCaseMsg.includes('accommodation') || lowerCaseMsg.includes('stay')) {
-      return {
-        message: 'I can help you find the perfect accommodation. What type of place are you looking to stay in?',
-        suggestions: [
-          { id: '1', text: 'Luxury hotels' },
-          { id: '2', text: 'Budget hotels' },
-          { id: '3', text: 'Vacation rentals' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('flight') || lowerCaseMsg.includes('airline') || lowerCaseMsg.includes('plane')) {
-      return {
-        message: 'For the best flight deals, I recommend booking 2-3 months in advance and using price comparison websites. Would you like tips for a specific airline or route?',
-        suggestions: [
-          { id: '1', text: 'Best time to book' },
-          { id: '2', text: 'Cheapest airlines' },
-          { id: '3', text: 'Flight comfort tips' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('europe')) {
+    }
+    
+    // Handle specific continent/region queries
+    if (lowerCaseMsg.includes('europe')) {
       return {
         message: 'Europe offers incredible diversity - from the romantic streets of Paris to the ancient ruins of Rome. Popular destinations include Italy, Spain, France, and Greece. Which European country interests you most?',
         suggestions: [
@@ -494,6 +495,33 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
           { id: '1', text: 'Japan guide' },
           { id: '2', text: 'Thailand guide' },
           { id: '3', text: 'Vietnam guide' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('beach vacation') || lowerCaseMsg.includes('beach holiday')) {
+      return {
+        message: 'Beach destinations offer the perfect escape with sun, sand, and relaxation. Popular beach destinations include the Maldives, Bali, Hawaii, Amalfi Coast, and Thailand\'s islands. What type of beach experience are you looking for?',
+        suggestions: [
+          { id: '1', text: 'Tropical paradise' },
+          { id: '2', text: 'Mediterranean beaches' },
+          { id: '3', text: 'Family beach destinations' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('city break')) {
+      return {
+        message: 'City breaks offer rich cultural experiences in a short time. Popular destinations include Paris, Barcelona, Rome, Tokyo, and New York. Are you looking for a specific type of city experience?',
+        suggestions: [
+          { id: '1', text: 'Historic cities' },
+          { id: '2', text: 'Modern metropolises' },
+          { id: '3', text: 'Foodie cities' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('adventure tour')) {
+      return {
+        message: 'Adventure tours offer thrilling experiences in stunning natural settings. Popular options include Costa Rica rainforest tours, New Zealand bungee jumping, African safaris, and Himalayan treks. What type of adventure appeals to you?',
+        suggestions: [
+          { id: '1', text: 'Mountain adventures' },
+          { id: '2', text: 'Water sports' },
+          { id: '3', text: 'Wildlife expeditions' },
         ],
       };
     }
