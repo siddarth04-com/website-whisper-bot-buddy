@@ -277,9 +277,8 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     // Update travel preferences based on the message
     updateTravelPreferences(userMessage);
     
-    // Handle "Popular destinations" suggestion
-    if (lowerCaseMsg === 'popular destinations' || 
-        lowerCaseMsg.includes('popular') && lowerCaseMsg.includes('destinations')) {
+    // Handle specific input messages - exact matching
+    if (lowerCaseMsg === 'popular destinations') {
       return {
         message: "Here are some of the most popular travel destinations right now:\n\n" +
                 "1. Paris, France - The City of Light with iconic landmarks\n" +
@@ -295,6 +294,71 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         ]
       };
     }
+    
+    // Handle "Travel packages" suggestion
+    if (lowerCaseMsg === 'travel packages') {
+      return {
+        message: 'We offer various travel packages based on your preferences. Would you like to explore packages for:',
+        suggestions: [
+          { id: '1', text: 'Beach vacations' },
+          { id: '2', text: 'City breaks' },
+          { id: '3', text: 'Adventure tours' },
+        ],
+      };
+    }
+    
+    // Handle "Travel tips" suggestion
+    if (lowerCaseMsg === 'travel tips') {
+      return {
+        message: 'Here are some general travel tips:\n\n• Book flights and accommodations in advance for better rates\n• Get travel insurance for peace of mind\n• Pack light and smart\n• Research local customs and phrases\n• Have a mix of payment methods\n\nWhat specific travel advice are you looking for?',
+        suggestions: [
+          { id: '1', text: 'Packing tips' },
+          { id: '2', text: 'Safety advice' },
+          { id: '3', text: 'Budget travel tips' },
+        ],
+      };
+    }
+
+    // Handle "Cultural destinations" or "Cultural experiences" suggestion
+    if (lowerCaseMsg === 'cultural destinations' || lowerCaseMsg === 'cultural experiences') {
+      const culturalPlaces = getTravelRecommendationsByGenre('cultural');
+      return {
+        message: `Here are some fantastic cultural destinations:\n\n1. ${culturalPlaces[0]} - Ancient ruins and Renaissance art\n2. ${culturalPlaces[1]} - Traditional temples and gardens\n3. ${culturalPlaces[2]} - Where East meets West\n4. ${culturalPlaces[3]} - Birthplace of democracy\n5. ${culturalPlaces[4]} - Home to ancient pyramids\n\nWould you like more details about any of these destinations?`,
+        suggestions: [
+          { id: '1', text: `Tell me about ${culturalPlaces[0]}` },
+          { id: '2', text: `Tell me about ${culturalPlaces[1]}` },
+          { id: '3', text: 'Budget-friendly cultural trips' }
+        ]
+      };
+    }
+
+    // Handle "Budget-friendly options" suggestion
+    if (lowerCaseMsg === 'budget-friendly options') {
+      const budgetPlaces = getTravelRecommendationsByBudget('low');
+      return {
+        message: `Here are some excellent budget-friendly destinations:\n\n1. ${budgetPlaces[0]} - Amazing street food and affordable accommodations\n2. ${budgetPlaces[1]} - Rich culture at reasonable prices\n3. ${budgetPlaces[2]} - European charm without breaking the bank\n4. ${budgetPlaces[3]} - Vibrant city with affordable options\n5. ${budgetPlaces[4]} - Great value Mediterranean destination\n\nWould you like budget tips for any of these places?`,
+        suggestions: [
+          { id: '1', text: `Budget guide for ${budgetPlaces[0]}` },
+          { id: '2', text: 'Money-saving travel tips' },
+          { id: '3', text: 'Affordable accommodations' }
+        ]
+      };
+    }
+
+    // Handle "Family vacation ideas" suggestion
+    if (lowerCaseMsg === 'family vacation ideas') {
+      const familyPlaces = getTravelRecommendationsByStyle('family');
+      return {
+        message: `Here are some fantastic family-friendly destinations:\n\n1. ${familyPlaces[0]} - Theme parks and entertainment\n2. ${familyPlaces[1]} - Safe and kid-friendly attractions\n3. ${familyPlaces[2]} - Museums and historical sites for all ages\n4. ${familyPlaces[3]} - Beaches and wildlife parks\n5. ${familyPlaces[4]} - Clean, safe city with lots to explore\n\nWhat type of family experience are you looking for?`,
+        suggestions: [
+          { id: '1', text: 'Beach family vacation' },
+          { id: '2', text: 'Educational travel with kids' },
+          { id: '3', text: 'Theme park holidays' }
+        ]
+      };
+    }
+    
+    // Handle more specific responses based on content patterns
     
     // Check for weather-related queries
     const weatherRegex = /weather\s+(?:in|at|for)?\s+([a-zA-Z\s]+)/i;
@@ -324,6 +388,47 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
           ],
         };
       }
+    }
+    
+    // Handle "Tell me about X" for destinations
+    const tellMeAboutRegex = /tell me about\s+([a-zA-Z\s,]+)/i;
+    const tellMeAboutMatch = userMessage.match(tellMeAboutRegex);
+
+    if (tellMeAboutMatch && tellMeAboutMatch[1]) {
+      const destination = tellMeAboutMatch[1].trim();
+      
+      // Destination information database (simplified)
+      const destinationInfo: Record<string, string> = {
+        'paris': 'Paris, the capital of France, is known for iconic landmarks like the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral. The city offers world-class dining, art, and fashion experiences. Best time to visit is April-June or September-October to avoid crowds. Budget: Mid to high. Popular for couples and cultural enthusiasts.',
+        'tokyo': 'Tokyo is Japan\'s vibrant capital mixing ultramodern and traditional aspects. Visit the Meiji Shrine, Imperial Palace, and Shibuya Crossing. The city offers incredible food, from street vendors to Michelin-starred restaurants. Best time to visit is March-April for cherry blossoms or October-November for fall colors. Budget: Mid to high.',
+        'barcelona': 'Barcelona, Spain\'s cosmopolitan capital of Catalonia, is defined by Antoni Gaudí\'s whimsical architecture, including the Sagrada Família. The city offers beautiful beaches, vibrant markets, and delicious tapas. Best time to visit is May-June or September-October. Budget: Medium. Great for friends, couples, and food lovers.',
+        'new york': 'New York City comprises 5 boroughs where the Hudson River meets the Atlantic. At its core is Manhattan, a densely populated borough that\'s among the world\'s major commercial and cultural centers. Must-sees include the Empire State Building, Central Park, and Times Square. Best time to visit is April-June or September-November. Budget: High.',
+        'bali': 'Bali is an Indonesian island known for its volcanic mountains, iconic rice paddies, beaches, and coral reefs. The island is home to religious sites such as cliffside Uluwatu Temple. To the south, the beachside city of Kuta has lively bars, while Seminyak offers luxury resorts and dining. Best time to visit is April-June or September-October. Budget: Low to medium.',
+        'rome': 'Rome, Italy\'s capital, is a sprawling cosmopolitan city with nearly 3,000 years of globally influential art, architecture and culture on display. Ancient ruins such as the Roman Forum and the Colosseum evoke the power of the former Roman Empire. Vatican City, headquarters of the Roman Catholic Church, boasts St. Peter\'s Basilica and the Vatican Museums. Best time to visit is April-May or September-October. Budget: Medium.',
+        'kyoto': 'Kyoto, once the capital of Japan, is famous for its numerous classical Buddhist temples, gardens, imperial palaces, Shinto shrines and traditional wooden houses. It\'s also known for formal traditions such as kaiseki dining and geisha entertainers. Best time to visit is March-April for cherry blossoms or November for autumn colors. Budget: Medium to high.',
+        'istanbul': 'Istanbul is a major city in Turkey that straddles Europe and Asia across the Bosphorus Strait. The Old City reflects cultural influences of the many empires that once ruled here. In Sultanahmet, the open-air Hippodrome was the site of chariot races, and Egyptian obelisks remain. The iconic Byzantine Hagia Sophia features a soaring dome and Christian mosaics. Best time to visit is April-May or September-October. Budget: Low to medium.',
+        'bangkok': 'Bangkok, Thailand\'s capital, is a large city known for ornate shrines and vibrant street life. The boat-filled Chao Phraya River feeds its network of canals. The city is famous for its vibrant street food scene, lively nightlife, and shopping opportunities. Best time to visit is November to February when the weather is cooler and drier. Budget: Low to medium.',
+        'costa rica': 'Costa Rica is a rugged, rainforested Central American country with coastlines on the Caribbean and Pacific. Though its capital, San Jose, is home to cultural institutions like the Pre-Columbian Gold Museum, Costa Rica is known for its beaches, volcanoes, and biodiversity. Roughly a quarter of its area is made up of protected jungle. Best time to visit is December to April during the dry season. Budget: Medium.'
+      };
+      
+      let info = 'I don\'t have specific information about that destination yet.';
+      
+      // Try to match the destination with our database
+      for (const key in destinationInfo) {
+        if (destination.toLowerCase().includes(key)) {
+          info = destinationInfo[key];
+          break;
+        }
+      }
+      
+      return {
+        message: info + '\n\nWould you like to know more specific details?',
+        suggestions: [
+          { id: '1', text: `Weather in ${destination}` },
+          { id: '2', text: `Things to do in ${destination}` },
+          { id: '3', text: 'Show me similar places' }
+        ]
+      };
     }
     
     // Handle requests for travel recommendations based on collected preferences
@@ -360,11 +465,12 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       };
     }
     
-    // Handle genre-specific queries
-    if (lowerCaseMsg.includes('genre') || 
+    // Handle "What are your travel preferences" and genre-specific queries
+    if (lowerCaseMsg.includes('what are your travel preferences') || 
+        lowerCaseMsg.includes('genre') || 
         lowerCaseMsg.includes('interest') || 
         lowerCaseMsg.includes('type of trip') ||
-        lowerCaseMsg.includes('what are your travel preferences')) {
+        lowerCaseMsg.includes('refine my preferences')) {
       
       return {
         message: 'What type of travel experience are you looking for? I can recommend destinations based on different interests:',
@@ -415,89 +521,41 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         ]
       };
     }
-    
-    // Process destination-specific queries
-    const destinationRegex = /(?:about|visit|travel to|go to|tell me about)\s+([a-zA-Z\s,]+?)(?:\s|\?|$)/i;
-    const destinationMatch = userMessage.match(destinationRegex);
-    
-    if (destinationMatch && destinationMatch[1]) {
-      const destination = destinationMatch[1].trim();
-      
-      // Destination information database (simplified)
-      const destinationInfo: Record<string, string> = {
-        'paris': 'Paris, the capital of France, is known for iconic landmarks like the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral. The city offers world-class dining, art, and fashion experiences. Best time to visit is April-June or September-October to avoid crowds. Budget: Mid to high. Popular for couples and cultural enthusiasts.',
-        'tokyo': 'Tokyo is Japan\'s vibrant capital mixing ultramodern and traditional aspects. Visit the Meiji Shrine, Imperial Palace, and Shibuya Crossing. The city offers incredible food, from street vendors to Michelin-starred restaurants. Best time to visit is March-April for cherry blossoms or October-November for fall colors. Budget: Mid to high.',
-        'barcelona': 'Barcelona, Spain\'s cosmopolitan capital of Catalonia, is defined by Antoni Gaudí\'s whimsical architecture, including the Sagrada Família. The city offers beautiful beaches, vibrant markets, and delicious tapas. Best time to visit is May-June or September-October. Budget: Medium. Great for friends, couples, and food lovers.',
-        'new york': 'New York City comprises 5 boroughs where the Hudson River meets the Atlantic. At its core is Manhattan, a densely populated borough that\'s among the world\'s major commercial and cultural centers. Must-sees include the Empire State Building, Central Park, and Times Square. Best time to visit is April-June or September-November. Budget: High.',
-        'bali': 'Bali is an Indonesian island known for its volcanic mountains, iconic rice paddies, beaches, and coral reefs. The island is home to religious sites such as cliffside Uluwatu Temple. To the south, the beachside city of Kuta has lively bars, while Seminyak offers luxury resorts and dining. Best time to visit is April-June or September-October. Budget: Low to medium.'
-      };
-      
-      let info = 'I don\'t have specific information about that destination yet.';
-      
-      // Try to match the destination with our database
-      for (const key in destinationInfo) {
-        if (destination.toLowerCase().includes(key)) {
-          info = destinationInfo[key];
-          break;
-        }
+
+    // Handle specific activity-based queries
+    if (lowerCaseMsg.includes('things to do in')) {
+      const cityMatch = userMessage.match(/things to do in\s+([a-zA-Z\s,]+)/i);
+      if (cityMatch && cityMatch[1]) {
+        const city = cityMatch[1].trim();
+        return {
+          message: `Top things to do in ${city}:\n\n• Explore the main attractions and landmarks\n• Visit local museums and cultural sites\n• Try local cuisine and restaurants\n• Shop at markets and local stores\n• Experience the local nightlife\n\nWould you like more specific recommendations for ${city}?`,
+          suggestions: [
+            { id: '1', text: `Museums in ${city}` },
+            { id: '2', text: `Restaurants in ${city}` },
+            { id: '3', text: `Day trips from ${city}` },
+          ]
+        };
       }
-      
-      return {
-        message: info + '\n\nWould you like to know more specific details?',
-        suggestions: [
-          { id: '1', text: `Weather in ${destination}` },
-          { id: '2', text: `Things to do in ${destination}` },
-          { id: '3', text: 'Show me similar places' }
-        ]
-      };
     }
-    
-    // Handle specific topic queries
-    
-    // Travel packages
-    if (lowerCaseMsg === 'travel packages' || lowerCaseMsg.includes('package') || lowerCaseMsg.includes('deal') || lowerCaseMsg.includes('offer')) {
-      return {
-        message: 'We offer various travel packages based on your preferences. Would you like to explore packages for:',
-        suggestions: [
-          { id: '1', text: 'Beach vacations' },
-          { id: '2', text: 'City breaks' },
-          { id: '3', text: 'Adventure tours' },
-        ],
-      };
+
+    // Handle "Best time to visit" queries
+    if (lowerCaseMsg.includes('best time to visit')) {
+      const cityMatch = userMessage.match(/best time to visit\s+([a-zA-Z\s,]+)/i);
+      if (cityMatch && cityMatch[1]) {
+        const city = cityMatch[1].trim();
+        return {
+          message: `The best time to visit ${city} typically depends on weather and tourist seasons. Generally, spring (April-May) and fall (September-October) offer pleasant weather and fewer crowds in most destinations. Would you like more specific seasonal information about ${city}?`,
+          suggestions: [
+            { id: '1', text: `Weather in ${city}` },
+            { id: '2', text: `${city} on a budget` },
+            { id: '3', text: `${city} local festivals` },
+          ]
+        };
+      }
     }
-    
-    // Travel tips
-    if (lowerCaseMsg === 'travel tips' || lowerCaseMsg.includes('tip') || lowerCaseMsg.includes('advice') || lowerCaseMsg.includes('recommendation')) {
-      return {
-        message: 'Here are some general travel tips:\n\n• Book flights and accommodations in advance for better rates\n• Get travel insurance for peace of mind\n• Pack light and smart\n• Research local customs and phrases\n• Have a mix of payment methods\n\nWhat specific travel advice are you looking for?',
-        suggestions: [
-          { id: '1', text: 'Packing tips' },
-          { id: '2', text: 'Safety advice' },
-          { id: '3', text: 'Budget travel tips' },
-        ],
-      };
-    }
-    
-    // Handle specific continent/region queries
-    if (lowerCaseMsg.includes('europe')) {
-      return {
-        message: 'Europe offers incredible diversity - from the romantic streets of Paris to the ancient ruins of Rome. Popular destinations include Italy, Spain, France, and Greece. Which European country interests you most?',
-        suggestions: [
-          { id: '1', text: 'Italy guide' },
-          { id: '2', text: 'Spain guide' },
-          { id: '3', text: 'France guide' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('asia')) {
-      return {
-        message: 'Asia is a fascinating continent with diverse cultures and landscapes. Popular destinations include Japan, Thailand, Vietnam, and Indonesia. Would you like information on a specific Asian country?',
-        suggestions: [
-          { id: '1', text: 'Japan guide' },
-          { id: '2', text: 'Thailand guide' },
-          { id: '3', text: 'Vietnam guide' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('beach vacation') || lowerCaseMsg.includes('beach holiday')) {
+
+    // Handle specific destination & activity combinations
+    if (lowerCaseMsg.includes('beach vacation') || lowerCaseMsg.includes('beach holiday')) {
       return {
         message: 'Beach destinations offer the perfect escape with sun, sand, and relaxation. Popular beach destinations include the Maldives, Bali, Hawaii, Amalfi Coast, and Thailand\'s islands. What type of beach experience are you looking for?',
         suggestions: [
@@ -525,8 +583,29 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         ],
       };
     }
+
+    // Handle continent/region queries
+    if (lowerCaseMsg.includes('europe')) {
+      return {
+        message: 'Europe offers incredible diversity - from the romantic streets of Paris to the ancient ruins of Rome. Popular destinations include Italy, Spain, France, and Greece. Which European country interests you most?',
+        suggestions: [
+          { id: '1', text: 'Italy guide' },
+          { id: '2', text: 'Spain guide' },
+          { id: '3', text: 'France guide' },
+        ],
+      };
+    } else if (lowerCaseMsg.includes('asia')) {
+      return {
+        message: 'Asia is a fascinating continent with diverse cultures and landscapes. Popular destinations include Japan, Thailand, Vietnam, and Indonesia. Would you like information on a specific Asian country?',
+        suggestions: [
+          { id: '1', text: 'Japan guide' },
+          { id: '2', text: 'Thailand guide' },
+          { id: '3', text: 'Vietnam guide' },
+        ],
+      };
+    }
     
-    // Default response
+    // Default response if no specific patterns match
     return {
       message: "I can help you plan your perfect trip! Tell me what kind of travel experience you're looking for - are you interested in cultural exploration, adventure activities, relaxation, or something else? I can also suggest destinations based on your budget and travel style, or check the weather for any city.",
       suggestions: [
@@ -580,3 +659,4 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
+
