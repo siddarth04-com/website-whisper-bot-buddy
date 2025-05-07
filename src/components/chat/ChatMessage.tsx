@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MessageType, WeatherData } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
-import { Cloud, Sun, CloudSun, CloudRain, Wind } from 'lucide-react';
+import { Cloud, Sun, CloudSun, CloudRain, Wind, Volume2, VolumeX } from 'lucide-react';
 
 interface ChatMessageProps {
   message: MessageType;
@@ -52,6 +52,7 @@ const WeatherCard = ({ data }: { data: WeatherData }) => {
 };
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const isBot = message.sender === 'bot';
   const hasWeatherData = isBot && message.content.includes("Currently in ") && message.content.includes("°C with");
 
@@ -61,6 +62,43 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     const match = message.content.match(/Currently in ([^,]+),/);
     if (match) city = match[1];
   }
+
+  // Text to speech functionality
+  const speak = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Configure speech properties
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      // Get available voices and set a good one if available
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoices = voices.filter(voice => voice.lang.includes('en'));
+      if (englishVoices.length > 0) {
+        utterance.voice = englishVoices[0];
+      }
+      
+      // Event handlers
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      // Start speaking
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
 
   return (
     <div 
@@ -76,7 +114,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
       <div 
         className={cn(
-          "px-4 py-3 rounded-lg max-w-[80%] shadow-sm",
+          "px-4 py-3 rounded-lg max-w-[80%] shadow-sm relative",
           isBot 
             ? "bg-white rounded-tl-none border-l-4 border-[#33C3F0]" 
             : "bg-[#EBF8FF] rounded-tr-none"
@@ -98,7 +136,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         )}
         
         {isBot && (
-          <p className="text-xs text-gray-400 mt-1">Travel Assistant</p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs text-gray-400">Travel Assistant</p>
+            {isSpeaking ? (
+              <button 
+                onClick={stopSpeaking} 
+                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+                aria-label="Stop speaking"
+                title="Stop speaking"
+              >
+                <VolumeX size={16} />
+              </button>
+            ) : (
+              <button 
+                onClick={() => speak(message.content)} 
+                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+                aria-label="Listen to response"
+                title="Listen to response"
+              >
+                <Volume2 size={16} />
+              </button>
+            )}
+          </div>
         )}
       </div>
       {!isBot && (
