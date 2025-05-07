@@ -12,8 +12,10 @@ const ChatBot: React.FC = () => {
 
   // Scroll to bottom when new messages are added
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (messagesEndRef.current && isOpen) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isOpen]);
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">

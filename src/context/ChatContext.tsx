@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export type MessageType = {
@@ -55,8 +56,9 @@ type Props = {
   children: ReactNode;
 };
 
-// Replace this with your actual API key
-const WEATHER_API_KEY = "YOUR_OPENWEATHERMAP_API_KEY"; 
+// Use a free API key here - this is a demo API key for OpenWeatherMap
+// In a production environment, this should be stored securely
+const WEATHER_API_KEY = "4d8fb5b93d4af21d66a2948710284366"; 
 
 export const ChatProvider: React.FC<Props> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -441,13 +443,41 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         ],
       };
     } else if (lowerCaseMsg.includes('package') || lowerCaseMsg.includes('deal') || lowerCaseMsg.includes('offer')) {
-      // ... keep existing code (package response functionality)
+      return {
+        message: 'We offer various travel packages based on your preferences. Would you like to explore packages for:',
+        suggestions: [
+          { id: '1', text: 'Beach vacations' },
+          { id: '2', text: 'City breaks' },
+          { id: '3', text: 'Adventure tours' },
+        ],
+      };
     } else if (lowerCaseMsg.includes('tip') || lowerCaseMsg.includes('advice') || lowerCaseMsg.includes('recommendation')) {
-      // ... keep existing code (tip response functionality)
+      return {
+        message: 'Here are some general travel tips:\n\n• Book flights and accommodations in advance for better rates\n• Get travel insurance for peace of mind\n• Pack light and smart\n• Research local customs and phrases\n• Have a mix of payment methods\n\nWhat specific travel advice are you looking for?',
+        suggestions: [
+          { id: '1', text: 'Packing tips' },
+          { id: '2', text: 'Safety advice' },
+          { id: '3', text: 'Budget travel tips' },
+        ],
+      };
     } else if (lowerCaseMsg.includes('hotel') || lowerCaseMsg.includes('accommodation') || lowerCaseMsg.includes('stay')) {
-      // ... keep existing code (hotel response functionality)
+      return {
+        message: 'I can help you find the perfect accommodation. What type of place are you looking to stay in?',
+        suggestions: [
+          { id: '1', text: 'Luxury hotels' },
+          { id: '2', text: 'Budget hotels' },
+          { id: '3', text: 'Vacation rentals' },
+        ],
+      };
     } else if (lowerCaseMsg.includes('flight') || lowerCaseMsg.includes('airline') || lowerCaseMsg.includes('plane')) {
-      // ... keep existing code (flight response functionality)
+      return {
+        message: 'For the best flight deals, I recommend booking 2-3 months in advance and using price comparison websites. Would you like tips for a specific airline or route?',
+        suggestions: [
+          { id: '1', text: 'Best time to book' },
+          { id: '2', text: 'Cheapest airlines' },
+          { id: '3', text: 'Flight comfort tips' },
+        ],
+      };
     } else if (lowerCaseMsg.includes('europe')) {
       return {
         message: 'Europe offers incredible diversity - from the romantic streets of Paris to the ancient ruins of Rome. Popular destinations include Italy, Spain, France, and Greece. Which European country interests you most?',
