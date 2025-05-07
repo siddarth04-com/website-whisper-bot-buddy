@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { MessageType, WeatherData } from '../../context/ChatContext';
+import { MessageType, WeatherData, TravelPreferences } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
-import { Cloud, Sun, CloudSun, CloudRain, Wind, Volume2, VolumeX } from 'lucide-react';
+import { Cloud, Sun, CloudSun, CloudRain, Wind, Volume2, VolumeX, Compass, MapPin } from 'lucide-react';
 
 interface ChatMessageProps {
   message: MessageType;
@@ -51,10 +51,51 @@ const WeatherCard = ({ data }: { data: WeatherData }) => {
   );
 };
 
+// Component to display destination recommendations
+const DestinationRecommendations = ({ message }: { message: string }) => {
+  // Check if message contains a numbered list of destinations
+  if (!/\d\.\s[A-Za-z\s,]+/.test(message)) {
+    return null;
+  }
+  
+  // Extract destinations from message
+  const destinations: string[] = [];
+  const lines = message.split('\n');
+  
+  for (const line of lines) {
+    const match = line.match(/\d\.\s([A-Za-z\s,]+)/);
+    if (match && match[1]) {
+      destinations.push(match[1].trim());
+    }
+  }
+  
+  if (destinations.length === 0) {
+    return null;
+  }
+  
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-[#D3E4FD]">
+      <div className="flex items-center mb-2">
+        <Compass className="text-[#33C3F0] mr-2" size={20} />
+        <h3 className="font-medium text-[#33C3F0]">Recommended Destinations</h3>
+      </div>
+      <div className="grid grid-cols-1 gap-2 text-sm">
+        {destinations.map((destination, index) => (
+          <div key={index} className="flex items-center">
+            <MapPin size={16} className="text-gray-400 mr-2" />
+            <p className="font-medium">{destination}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const isBot = message.sender === 'bot';
   const hasWeatherData = isBot && message.content.includes("Currently in ") && message.content.includes("°C with");
+  const hasDestinations = isBot && message.content.includes("I recommend considering these destinations");
 
   // Extract city name from message for weather display
   let city = "";
@@ -120,7 +161,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : "bg-[#EBF8FF] rounded-tr-none"
         )}
       >
-        <p className="text-sm">{message.content}</p>
+        <p className="text-sm whitespace-pre-line">{message.content}</p>
         
         {hasWeatherData && (
           <WeatherCard 
@@ -133,6 +174,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               windSpeed: parseFloat(message.content.match(/wind speed is ([\d.]+) m\/s/)?.[1] || "0")
             }} 
           />
+        )}
+
+        {hasDestinations && (
+          <DestinationRecommendations message={message.content} />
         )}
         
         {isBot && (

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChatContext, SuggestedReplyType } from '../../context/ChatContext';
-import { Send, Mic, MicOff } from 'lucide-react';
+import { Send, Mic, MicOff, MapPin, Compass } from 'lucide-react';
 
 const ChatInput: React.FC = () => {
   const { sendMessage, suggestedReplies } = useChatContext();
@@ -88,17 +88,35 @@ const ChatInput: React.FC = () => {
     }
   };
 
+  // Get icon based on reply content
+  const getSuggestionIcon = (text: string) => {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('weather')) {
+      return <MapPin size={14} className="mr-1" />;
+    } else if (lowerText.includes('destination') || 
+               lowerText.includes('guide') || 
+               lowerText.includes('place') || 
+               lowerText.includes('city') || 
+               lowerText.includes('country')) {
+      return <Compass size={14} className="mr-1" />;
+    }
+    
+    return null;
+  };
+
   return (
     <div className="border-t border-gray-200 p-4 bg-white">
-      {/* Suggested replies */}
+      {/* Suggested replies with icons */}
       {suggestedReplies.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {suggestedReplies.map((reply) => (
             <button
               key={reply.id}
-              className="bg-[#EBF8FF] border border-[#D3E4FD] hover:bg-[#D3E4FD] text-[#33C3F0] text-sm rounded-full px-3 py-1 transition-colors"
+              className="bg-[#EBF8FF] border border-[#D3E4FD] hover:bg-[#D3E4FD] text-[#33C3F0] text-sm rounded-full px-3 py-1 transition-colors flex items-center"
               onClick={() => handleSuggestedReply(reply)}
             >
+              {getSuggestionIcon(reply.text)}
               {reply.text}
             </button>
           ))}
@@ -110,7 +128,7 @@ const ChatInput: React.FC = () => {
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder={isListening ? "Listening..." : "Ask about destinations, tips, etc..."}
+          placeholder={isListening ? "Listening..." : "Ask about destinations, tips, budget options, etc..."}
           className={`flex-grow border-[#D3E4FD] focus-visible:ring-[#33C3F0] ${
             isListening ? "border-[#33C3F0] bg-[#F0FAFF]" : ""
           }`}
