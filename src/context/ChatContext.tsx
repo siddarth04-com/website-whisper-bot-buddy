@@ -88,6 +88,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
   const fetchWeatherData = async (city: string): Promise<WeatherData | null> => {
     try {
+      console.log('Fetching weather data for:', city);
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${WEATHER_API_KEY}`
       );
@@ -97,6 +98,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       }
       
       const data = await response.json();
+      console.log('Weather data received:', data);
       
       return {
         city: data.name,
@@ -177,6 +179,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
   
   // Update preferences based on user input
   const updateTravelPreferences = (userMessage: string) => {
+    console.log('Updating travel preferences for message:', userMessage);
     const lowerMsg = userMessage.toLowerCase();
     
     // Check for genre/interests
@@ -193,6 +196,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     for (const pattern of genrePatterns) {
       if (pattern.regex.test(lowerMsg)) {
+        console.log('Detected genre:', pattern.value);
         setTravelPreferences(prev => ({ ...prev, genre: pattern.value }));
         break;
       }
@@ -208,6 +212,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     for (const pattern of budgetPatterns) {
       if (pattern.regex.test(lowerMsg)) {
+        console.log('Detected budget:', pattern.value);
         setTravelPreferences(prev => ({ ...prev, budget: pattern.value }));
         break;
       }
@@ -223,6 +228,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     for (const pattern of stylePatterns) {
       if (pattern.regex.test(lowerMsg)) {
+        console.log('Detected style:', pattern.value);
         setTravelPreferences(prev => ({ ...prev, style: pattern.value }));
         break;
       }
@@ -230,6 +236,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
   };
 
   const getDestinationRecommendations = () => {
+    console.log('Getting destination recommendations with preferences:', travelPreferences);
     let recommendations: string[] = [];
     const { genre, budget, style } = travelPreferences;
     
@@ -268,123 +275,145 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       ];
     }
     
+    console.log('Final recommendations:', recommendations);
     return recommendations;
   };
 
   const generateBotResponse = async (userMessage: string): Promise<{ message: string; suggestions: SuggestedReplyType[] }> => {
-    const lowerCaseMsg = userMessage.toLowerCase();
+    console.log('Generating bot response for:', userMessage);
+    const lowerCaseMsg = userMessage.toLowerCase().trim();
     
     // Update travel preferences based on the message
     updateTravelPreferences(userMessage);
     
-    // Handle specific input messages - exact matching
+    // Handle specific input messages - exact matching first
     if (lowerCaseMsg === 'popular destinations') {
+      console.log('Handling popular destinations request');
       return {
         message: "Here are some of the most popular travel destinations right now:\n\n" +
-                "1. Paris, France - The City of Light with iconic landmarks\n" +
-                "2. Tokyo, Japan - Ultramodern meets traditional\n" +
-                "3. Bali, Indonesia - Beautiful beaches and spiritual retreats\n" +
-                "4. Barcelona, Spain - Stunning architecture and vibrant culture\n" +
-                "5. New York, USA - The city that never sleeps\n\n" +
-                "Would you like more information about any of these places?",
+                "🗼 **Paris, France** - The City of Light with iconic landmarks like the Eiffel Tower and Louvre\n" +
+                "🏯 **Tokyo, Japan** - Where ultramodern meets traditional culture\n" +
+                "🏖️ **Bali, Indonesia** - Beautiful beaches and spiritual retreats\n" +
+                "🏛️ **Barcelona, Spain** - Stunning architecture and vibrant Mediterranean culture\n" +
+                "🗽 **New York, USA** - The city that never sleeps\n\n" +
+                "Which destination interests you most? I can provide detailed information about any of these places!",
         suggestions: [
           { id: '1', text: 'Tell me about Paris' },
           { id: '2', text: 'Tell me about Tokyo' },
-          { id: '3', text: 'What are your travel preferences?' }
+          { id: '3', text: 'Tell me about Bali' },
+          { id: '4', text: 'Show me budget options' }
         ]
       };
     }
     
     // Handle "Travel packages" suggestion
     if (lowerCaseMsg === 'travel packages') {
+      console.log('Handling travel packages request');
       return {
-        message: 'We offer various travel packages based on your preferences. Would you like to explore packages for:',
+        message: 'I can help you find the perfect travel package! What type of experience are you looking for?',
         suggestions: [
           { id: '1', text: 'Beach vacations' },
           { id: '2', text: 'City breaks' },
           { id: '3', text: 'Adventure tours' },
+          { id: '4', text: 'Cultural experiences' }
         ],
       };
     }
     
     // Handle "Travel tips" suggestion
     if (lowerCaseMsg === 'travel tips') {
+      console.log('Handling travel tips request');
       return {
-        message: 'Here are some general travel tips:\n\n• Book flights and accommodations in advance for better rates\n• Get travel insurance for peace of mind\n• Pack light and smart\n• Research local customs and phrases\n• Have a mix of payment methods\n\nWhat specific travel advice are you looking for?',
+        message: 'Here are some essential travel tips to make your trip amazing:\n\n' +
+                '✈️ **Planning Tips:**\n' +
+                '• Book flights 6-8 weeks in advance for best rates\n' +
+                '• Get travel insurance for peace of mind\n' +
+                '• Check visa requirements early\n\n' +
+                '🎒 **Packing Smart:**\n' +
+                '• Pack light - you can always buy what you need\n' +
+                '• Bring copies of important documents\n' +
+                '• Pack essentials in carry-on\n\n' +
+                'What specific aspect of travel would you like more tips about?',
         suggestions: [
           { id: '1', text: 'Packing tips' },
           { id: '2', text: 'Safety advice' },
           { id: '3', text: 'Budget travel tips' },
+          { id: '4', text: 'Local culture tips' }
         ],
       };
     }
 
-    // Handle "Cultural destinations" or "Cultural experiences" suggestion
-    if (lowerCaseMsg === 'cultural destinations' || lowerCaseMsg === 'cultural experiences') {
+    // Handle more specific suggestion responses
+    if (lowerCaseMsg === 'cultural experiences' || lowerCaseMsg === 'cultural destinations') {
+      console.log('Handling cultural experiences request');
       const culturalPlaces = getTravelRecommendationsByGenre('cultural');
       return {
-        message: `Here are some fantastic cultural destinations:\n\n1. ${culturalPlaces[0]} - Ancient ruins and Renaissance art\n2. ${culturalPlaces[1]} - Traditional temples and gardens\n3. ${culturalPlaces[2]} - Where East meets West\n4. ${culturalPlaces[3]} - Birthplace of democracy\n5. ${culturalPlaces[4]} - Home to ancient pyramids\n\nWould you like more details about any of these destinations?`,
+        message: `Here are some incredible cultural destinations:\n\n🏛️ **${culturalPlaces[0]}** - Ancient ruins and Renaissance masterpieces\n🏯 **${culturalPlaces[1]}** - Traditional temples and zen gardens\n🕌 **${culturalPlaces[2]}** - Where East meets West with Byzantine heritage\n🏺 **${culturalPlaces[3]}** - Birthplace of democracy and philosophy\n🔺 **${culturalPlaces[4]}** - Home to ancient pyramids and pharaohs\n\nWhich cultural destination would you like to explore?`,
         suggestions: [
           { id: '1', text: `Tell me about ${culturalPlaces[0]}` },
           { id: '2', text: `Tell me about ${culturalPlaces[1]}` },
-          { id: '3', text: 'Budget-friendly cultural trips' }
+          { id: '3', text: 'Budget cultural trips' },
+          { id: '4', text: 'Cultural travel tips' }
         ]
       };
     }
 
-    // Handle "Budget-friendly options" suggestion
-    if (lowerCaseMsg === 'budget-friendly options') {
+    if (lowerCaseMsg === 'budget-friendly options' || lowerCaseMsg === 'show me budget options') {
+      console.log('Handling budget-friendly options request');
       const budgetPlaces = getTravelRecommendationsByBudget('low');
       return {
-        message: `Here are some excellent budget-friendly destinations:\n\n1. ${budgetPlaces[0]} - Amazing street food and affordable accommodations\n2. ${budgetPlaces[1]} - Rich culture at reasonable prices\n3. ${budgetPlaces[2]} - European charm without breaking the bank\n4. ${budgetPlaces[3]} - Vibrant city with affordable options\n5. ${budgetPlaces[4]} - Great value Mediterranean destination\n\nWould you like budget tips for any of these places?`,
+        message: `Here are excellent budget-friendly destinations:\n\n🍜 **${budgetPlaces[0]}** - Amazing street food and affordable luxury\n🏮 **${budgetPlaces[1]}** - Rich culture at unbeatable prices\n🏰 **${budgetPlaces[2]}** - European charm without the high costs\n🌮 **${budgetPlaces[3]}** - Vibrant culture and delicious cuisine\n🏘️ **${budgetPlaces[4]}** - Beautiful coastline and great value\n\nWould you like specific budget tips for any destination?`,
         suggestions: [
           { id: '1', text: `Budget guide for ${budgetPlaces[0]}` },
           { id: '2', text: 'Money-saving travel tips' },
-          { id: '3', text: 'Affordable accommodations' }
+          { id: '3', text: 'Affordable accommodations' },
+          { id: '4', text: 'Cheap flight tips' }
         ]
       };
     }
 
-    // Handle "Family vacation ideas" suggestion
     if (lowerCaseMsg === 'family vacation ideas') {
+      console.log('Handling family vacation ideas request');
       const familyPlaces = getTravelRecommendationsByStyle('family');
       return {
-        message: `Here are some fantastic family-friendly destinations:\n\n1. ${familyPlaces[0]} - Theme parks and entertainment\n2. ${familyPlaces[1]} - Safe and kid-friendly attractions\n3. ${familyPlaces[2]} - Museums and historical sites for all ages\n4. ${familyPlaces[3]} - Beaches and wildlife parks\n5. ${familyPlaces[4]} - Clean, safe city with lots to explore\n\nWhat type of family experience are you looking for?`,
+        message: `Perfect family-friendly destinations:\n\n🎢 **${familyPlaces[0]}** - Theme parks and magical experiences\n🧸 **${familyPlaces[1]}** - Safe, clean, and kid-friendly attractions\n🎭 **${familyPlaces[2]}** - Museums and history come alive\n🌊 **${familyPlaces[3]}** - Beautiful beaches and family activities\n🎡 **${familyPlaces[4]}** - Modern city with amazing family attractions\n\nWhat type of family experience are you looking for?`,
         suggestions: [
           { id: '1', text: 'Beach family vacation' },
           { id: '2', text: 'Educational travel with kids' },
-          { id: '3', text: 'Theme park holidays' }
+          { id: '3', text: 'Theme park holidays' },
+          { id: '4', text: 'Adventure for families' }
         ]
       };
     }
     
-    // Handle more specific responses based on content patterns
-    
-    // Check for weather-related queries
+    // Handle weather queries
     const weatherRegex = /weather\s+(?:in|at|for)?\s+([a-zA-Z\s]+)/i;
     const weatherMatch = userMessage.match(weatherRegex);
     
     if (lowerCaseMsg.includes('weather') && weatherMatch && weatherMatch[1]) {
+      console.log('Handling weather request for:', weatherMatch[1]);
       const city = weatherMatch[1].trim();
       const weather = await fetchWeatherData(city);
       
       if (weather) {
         setWeatherData(weather);
         return {
-          message: `Currently in ${weather.city}, it's ${weather.temp.toFixed(1)}°C with ${weather.description}. The humidity is ${weather.humidity}% and wind speed is ${weather.windSpeed} m/s. Would you like more information about ${weather.city} for your travels?`,
+          message: `Currently in ${weather.city}, it's ${weather.temp.toFixed(1)}°C with ${weather.description}. The humidity is ${weather.humidity}% and wind speed is ${weather.windSpeed} m/s.\n\nWould you like travel information for ${weather.city}?`,
           suggestions: [
             { id: '1', text: `Things to do in ${weather.city}` },
             { id: '2', text: `Best time to visit ${weather.city}` },
-            { id: '3', text: `${weather.city} travel tips` },
+            { id: '3', text: `${weather.city} travel guide` },
+            { id: '4', text: 'Show similar destinations' },
           ],
         };
       } else {
         return {
-          message: `I couldn't find weather information for "${city}". Could you please check the city name and try again?`,
+          message: `I couldn't find weather information for "${city}". Please check the city name and try again.`,
           suggestions: [
             { id: '1', text: 'Weather in Paris' },
             { id: '2', text: 'Weather in Tokyo' },
             { id: '3', text: 'Weather in New York' },
+            { id: '4', text: 'Popular destinations' },
           ],
         };
       }
@@ -395,144 +424,135 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     const tellMeAboutMatch = userMessage.match(tellMeAboutRegex);
 
     if (tellMeAboutMatch && tellMeAboutMatch[1]) {
+      console.log('Handling tell me about request for:', tellMeAboutMatch[1]);
       const destination = tellMeAboutMatch[1].trim();
       
-      // Destination information database (simplified)
-      const destinationInfo: Record<string, string> = {
-        'paris': 'Paris, the capital of France, is known for iconic landmarks like the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral. The city offers world-class dining, art, and fashion experiences. Best time to visit is April-June or September-October to avoid crowds. Budget: Mid to high. Popular for couples and cultural enthusiasts.',
-        'tokyo': 'Tokyo is Japan\'s vibrant capital mixing ultramodern and traditional aspects. Visit the Meiji Shrine, Imperial Palace, and Shibuya Crossing. The city offers incredible food, from street vendors to Michelin-starred restaurants. Best time to visit is March-April for cherry blossoms or October-November for fall colors. Budget: Mid to high.',
-        'barcelona': 'Barcelona, Spain\'s cosmopolitan capital of Catalonia, is defined by Antoni Gaudí\'s whimsical architecture, including the Sagrada Família. The city offers beautiful beaches, vibrant markets, and delicious tapas. Best time to visit is May-June or September-October. Budget: Medium. Great for friends, couples, and food lovers.',
-        'new york': 'New York City comprises 5 boroughs where the Hudson River meets the Atlantic. At its core is Manhattan, a densely populated borough that\'s among the world\'s major commercial and cultural centers. Must-sees include the Empire State Building, Central Park, and Times Square. Best time to visit is April-June or September-November. Budget: High.',
-        'bali': 'Bali is an Indonesian island known for its volcanic mountains, iconic rice paddies, beaches, and coral reefs. The island is home to religious sites such as cliffside Uluwatu Temple. To the south, the beachside city of Kuta has lively bars, while Seminyak offers luxury resorts and dining. Best time to visit is April-June or September-October. Budget: Low to medium.',
-        'rome': 'Rome, Italy\'s capital, is a sprawling cosmopolitan city with nearly 3,000 years of globally influential art, architecture and culture on display. Ancient ruins such as the Roman Forum and the Colosseum evoke the power of the former Roman Empire. Vatican City, headquarters of the Roman Catholic Church, boasts St. Peter\'s Basilica and the Vatican Museums. Best time to visit is April-May or September-October. Budget: Medium.',
-        'kyoto': 'Kyoto, once the capital of Japan, is famous for its numerous classical Buddhist temples, gardens, imperial palaces, Shinto shrines and traditional wooden houses. It\'s also known for formal traditions such as kaiseki dining and geisha entertainers. Best time to visit is March-April for cherry blossoms or November for autumn colors. Budget: Medium to high.',
-        'istanbul': 'Istanbul is a major city in Turkey that straddles Europe and Asia across the Bosphorus Strait. The Old City reflects cultural influences of the many empires that once ruled here. In Sultanahmet, the open-air Hippodrome was the site of chariot races, and Egyptian obelisks remain. The iconic Byzantine Hagia Sophia features a soaring dome and Christian mosaics. Best time to visit is April-May or September-October. Budget: Low to medium.',
-        'bangkok': 'Bangkok, Thailand\'s capital, is a large city known for ornate shrines and vibrant street life. The boat-filled Chao Phraya River feeds its network of canals. The city is famous for its vibrant street food scene, lively nightlife, and shopping opportunities. Best time to visit is November to February when the weather is cooler and drier. Budget: Low to medium.',
-        'costa rica': 'Costa Rica is a rugged, rainforested Central American country with coastlines on the Caribbean and Pacific. Though its capital, San Jose, is home to cultural institutions like the Pre-Columbian Gold Museum, Costa Rica is known for its beaches, volcanoes, and biodiversity. Roughly a quarter of its area is made up of protected jungle. Best time to visit is December to April during the dry season. Budget: Medium.'
+      // Destination information database
+      const destinationInfo: Record<string, { info: string; highlights: string[] }> = {
+        'paris': {
+          info: 'Paris, the capital of France, is known for iconic landmarks like the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral. The city offers world-class dining, art, and fashion experiences.',
+          highlights: ['Eiffel Tower', 'Louvre Museum', 'Champs-Élysées', 'Montmartre', 'Seine River cruises']
+        },
+        'tokyo': {
+          info: 'Tokyo is Japan\'s vibrant capital mixing ultramodern and traditional aspects. Visit the Meiji Shrine, Imperial Palace, and experience incredible food culture.',
+          highlights: ['Shibuya Crossing', 'Senso-ji Temple', 'Tokyo Skytree', 'Tsukiji Market', 'Harajuku district']
+        },
+        'barcelona': {
+          info: 'Barcelona, Spain\'s cosmopolitan capital, is defined by Antoni Gaudí\'s whimsical architecture and vibrant Mediterranean culture.',
+          highlights: ['Sagrada Família', 'Park Güell', 'Las Ramblas', 'Gothic Quarter', 'Barceloneta Beach']
+        },
+        'bali': {
+          info: 'Bali is an Indonesian island known for its volcanic mountains, iconic rice paddies, beaches, and coral reefs.',
+          highlights: ['Uluwatu Temple', 'Rice terraces', 'Seminyak beaches', 'Ubud culture', 'Mount Batur sunrise']
+        },
+        'new york': {
+          info: 'New York City comprises 5 boroughs where the Hudson River meets the Atlantic. Manhattan is among the world\'s major commercial and cultural centers.',
+          highlights: ['Times Square', 'Central Park', 'Statue of Liberty', 'Brooklyn Bridge', 'Broadway shows']
+        }
       };
       
-      let info = 'I don\'t have specific information about that destination yet.';
+      let info = '';
+      let highlights: string[] = [];
       
       // Try to match the destination with our database
       for (const key in destinationInfo) {
         if (destination.toLowerCase().includes(key)) {
-          info = destinationInfo[key];
+          info = destinationInfo[key].info;
+          highlights = destinationInfo[key].highlights;
           break;
         }
       }
       
-      return {
-        message: info + '\n\nWould you like to know more specific details?',
-        suggestions: [
-          { id: '1', text: `Weather in ${destination}` },
-          { id: '2', text: `Things to do in ${destination}` },
-          { id: '3', text: 'Show me similar places' }
-        ]
-      };
+      if (info) {
+        const highlightText = highlights.map(h => `• ${h}`).join('\n');
+        return {
+          message: `**${destination}** 🌟\n\n${info}\n\n**Top Highlights:**\n${highlightText}\n\nWhat would you like to know more about?`,
+          suggestions: [
+            { id: '1', text: `Weather in ${destination}` },
+            { id: '2', text: `Things to do in ${destination}` },
+            { id: '3', text: `Best time to visit ${destination}` },
+            { id: '4', text: 'Show me similar places' }
+          ]
+        };
+      } else {
+        return {
+          message: `I'd love to help you learn about ${destination}! While I don't have specific details about that destination yet, I can help you with popular destinations and travel planning.`,
+          suggestions: [
+            { id: '1', text: 'Popular destinations' },
+            { id: '2', text: 'Cultural experiences' },
+            { id: '3', text: 'Budget-friendly options' },
+            { id: '4', text: 'Travel tips' }
+          ]
+        };
+      }
     }
     
-    // Handle requests for travel recommendations based on collected preferences
+    // Handle travel recommendations
     if (lowerCaseMsg.includes('recommend') || 
         lowerCaseMsg.includes('suggestion') || 
         lowerCaseMsg.includes('where should i go') || 
         lowerCaseMsg.includes('place to visit')) {
       
+      console.log('Handling recommendation request');
       const recommendations = getDestinationRecommendations();
       const { genre, budget, style } = travelPreferences;
-      let preferencesText = '';
       
+      let preferencesText = 'Based on popular choices';
       if (genre || budget || style) {
         preferencesText = 'Based on your preferences';
         if (genre) preferencesText += ` for ${genre} experiences`;
         if (budget) preferencesText += ` with a ${budget} budget`;
         if (style) preferencesText += ` and ${style} travel style`;
-        preferencesText += ', ';
       }
       
       return {
-        message: `${preferencesText}I recommend considering these destinations:\n\n` + 
-                 `1. ${recommendations[0]}\n` +
-                 `2. ${recommendations[1]}\n` +
-                 `3. ${recommendations[2]}\n` +
-                 `4. ${recommendations[3]}\n` +
-                 `5. ${recommendations[4]}\n\n` +
-                 `Would you like specific information about any of these places?`,
+        message: `${preferencesText}, here are my top recommendations:\n\n` + 
+                 `🌟 **${recommendations[0]}**\n` +
+                 `🌟 **${recommendations[1]}**\n` +
+                 `🌟 **${recommendations[2]}**\n` +
+                 `🌟 **${recommendations[3]}**\n` +
+                 `🌟 **${recommendations[4]}**\n\n` +
+                 `Which destination would you like to explore further?`,
         suggestions: [
           { id: '1', text: `Tell me about ${recommendations[0]}` },
           { id: '2', text: `Tell me about ${recommendations[1]}` },
-          { id: '3', text: 'Refine my preferences' }
-        ]
-      };
-    }
-    
-    // Handle "What are your travel preferences" and genre-specific queries
-    if (lowerCaseMsg.includes('what are your travel preferences') || 
-        lowerCaseMsg.includes('genre') || 
-        lowerCaseMsg.includes('interest') || 
-        lowerCaseMsg.includes('type of trip') ||
-        lowerCaseMsg.includes('refine my preferences')) {
-      
-      return {
-        message: 'What type of travel experience are you looking for? I can recommend destinations based on different interests:',
-        suggestions: [
-          { id: '1', text: 'Cultural experiences' },
-          { id: '2', text: 'Adventure activities' },
-          { id: '3', text: 'Relaxation' },
-          { id: '4', text: 'Food & culinary' },
-          { id: '5', text: 'Beaches & ocean' }
-        ]
-      };
-    }
-    
-    // Handle budget-specific queries
-    if (lowerCaseMsg.includes('budget') || 
-        lowerCaseMsg.includes('cost') || 
-        lowerCaseMsg.includes('price') ||
-        lowerCaseMsg.includes('expensive') ||
-        lowerCaseMsg.includes('cheap')) {
-      
-      return {
-        message: 'I can suggest destinations that fit your budget. What kind of budget range are you considering for your trip?',
-        suggestions: [
-          { id: '1', text: 'Budget-friendly options' },
-          { id: '2', text: 'Mid-range budget' },
-          { id: '3', text: 'High-end travel' },
-          { id: '4', text: 'Luxury experiences' }
-        ]
-      };
-    }
-    
-    // Handle travel style queries
-    if (lowerCaseMsg.includes('style') || 
-        lowerCaseMsg.includes('travel with') || 
-        lowerCaseMsg.includes('traveling with') ||
-        lowerCaseMsg.includes('family trip') ||
-        lowerCaseMsg.includes('solo trip') ||
-        lowerCaseMsg.includes('romantic') ||
-        lowerCaseMsg.includes('honeymoon')) {
-      
-      return {
-        message: 'I can recommend destinations based on your travel style. Are you traveling:',
-        suggestions: [
-          { id: '1', text: 'Solo travel' },
-          { id: '2', text: 'As a couple' },
-          { id: '3', text: 'With family' },
-          { id: '4', text: 'With friends' }
+          { id: '3', text: 'Refine my preferences' },
+          { id: '4', text: 'Budget travel tips' }
         ]
       };
     }
 
-    // Handle specific activity-based queries
+    // Handle preference and interest queries
+    if (lowerCaseMsg.includes('what are your travel preferences') || 
+        lowerCaseMsg.includes('refine my preferences') ||
+        lowerCaseMsg.includes('travel preferences') ||
+        lowerCaseMsg.includes('type of trip')) {
+      
+      console.log('Handling travel preferences request');
+      return {
+        message: 'Let me help you find the perfect travel experience! What interests you most?',
+        suggestions: [
+          { id: '1', text: 'Cultural experiences' },
+          { id: '2', text: 'Adventure activities' },
+          { id: '3', text: 'Beach relaxation' },
+          { id: '4', text: 'Food & culinary' }
+        ]
+      };
+    }
+
+    // Handle activity-based queries
     if (lowerCaseMsg.includes('things to do in')) {
-      const cityMatch = userMessage.match(/things to do in\s+([a-zA-Z\s,]+)/i);
+      const cityMatch = userMessage.match(/things to do in\s+([a-zA-Z\s,]+)/i;
       if (cityMatch && cityMatch[1]) {
         const city = cityMatch[1].trim();
+        console.log('Handling things to do request for:', city);
         return {
-          message: `Top things to do in ${city}:\n\n• Explore the main attractions and landmarks\n• Visit local museums and cultural sites\n• Try local cuisine and restaurants\n• Shop at markets and local stores\n• Experience the local nightlife\n\nWould you like more specific recommendations for ${city}?`,
+          message: `Here are top activities in ${city}:\n\n🏛️ **Explore landmarks** - Visit iconic sights and monuments\n🎨 **Cultural sites** - Museums, galleries, and historical places\n🍽️ **Local cuisine** - Try authentic restaurants and street food\n🛍️ **Shopping** - Local markets and unique boutiques\n🌃 **Nightlife** - Bars, clubs, and entertainment venues\n\nWhat type of activity interests you most?`,
           suggestions: [
             { id: '1', text: `Museums in ${city}` },
             { id: '2', text: `Restaurants in ${city}` },
-            { id: '3', text: `Day trips from ${city}` },
+            { id: '3', text: `Nightlife in ${city}` },
+            { id: '4', text: `Weather in ${city}` }
           ]
         };
       }
@@ -540,84 +560,53 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
     // Handle "Best time to visit" queries
     if (lowerCaseMsg.includes('best time to visit')) {
-      const cityMatch = userMessage.match(/best time to visit\s+([a-zA-Z\s,]+)/i);
+      const cityMatch = userMessage.match(/best time to visit\s+([a-zA-Z\s,]+)/i;
       if (cityMatch && cityMatch[1]) {
         const city = cityMatch[1].trim();
+        console.log('Handling best time to visit request for:', city);
         return {
-          message: `The best time to visit ${city} typically depends on weather and tourist seasons. Generally, spring (April-May) and fall (September-October) offer pleasant weather and fewer crowds in most destinations. Would you like more specific seasonal information about ${city}?`,
+          message: `**Best time to visit ${city}:**\n\n🌤️ **Spring (Apr-May)** - Pleasant weather, fewer crowds\n☀️ **Summer (Jun-Aug)** - Peak season, warm weather\n🍂 **Fall (Sep-Oct)** - Great weather, beautiful colors\n❄️ **Winter (Nov-Mar)** - Off-season, potential savings\n\nThe ideal time depends on your preferences for weather, crowds, and budget!`,
           suggestions: [
             { id: '1', text: `Weather in ${city}` },
-            { id: '2', text: `${city} on a budget` },
-            { id: '3', text: `${city} local festivals` },
+            { id: '2', text: `${city} travel tips` },
+            { id: '3', text: `Things to do in ${city}` },
+            { id: '4', text: 'Seasonal travel advice' }
           ]
         };
       }
     }
 
-    // Handle specific destination & activity combinations
+    // Handle specific travel types
     if (lowerCaseMsg.includes('beach vacation') || lowerCaseMsg.includes('beach holiday')) {
+      console.log('Handling beach vacation request');
       return {
-        message: 'Beach destinations offer the perfect escape with sun, sand, and relaxation. Popular beach destinations include the Maldives, Bali, Hawaii, Amalfi Coast, and Thailand\'s islands. What type of beach experience are you looking for?',
+        message: '🏖️ **Beach Paradise Awaits!**\n\nPerfect beach destinations for sun, sand, and relaxation:\n\n🏝️ **Tropical:** Maldives, Bali, Fiji\n🌊 **Mediterranean:** Amalfi Coast, Santorini, Costa del Sol\n🐚 **Exotic:** Seychelles, Mauritius, Cook Islands\n\nWhat type of beach experience appeals to you?',
         suggestions: [
           { id: '1', text: 'Tropical paradise' },
           { id: '2', text: 'Mediterranean beaches' },
           { id: '3', text: 'Family beach destinations' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('city break')) {
-      return {
-        message: 'City breaks offer rich cultural experiences in a short time. Popular destinations include Paris, Barcelona, Rome, Tokyo, and New York. Are you looking for a specific type of city experience?',
-        suggestions: [
-          { id: '1', text: 'Historic cities' },
-          { id: '2', text: 'Modern metropolises' },
-          { id: '3', text: 'Foodie cities' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('adventure tour')) {
-      return {
-        message: 'Adventure tours offer thrilling experiences in stunning natural settings. Popular options include Costa Rica rainforest tours, New Zealand bungee jumping, African safaris, and Himalayan treks. What type of adventure appeals to you?',
-        suggestions: [
-          { id: '1', text: 'Mountain adventures' },
-          { id: '2', text: 'Water sports' },
-          { id: '3', text: 'Wildlife expeditions' },
+          { id: '4', text: 'Luxury beach resorts' }
         ],
       };
     }
 
-    // Handle continent/region queries
-    if (lowerCaseMsg.includes('europe')) {
-      return {
-        message: 'Europe offers incredible diversity - from the romantic streets of Paris to the ancient ruins of Rome. Popular destinations include Italy, Spain, France, and Greece. Which European country interests you most?',
-        suggestions: [
-          { id: '1', text: 'Italy guide' },
-          { id: '2', text: 'Spain guide' },
-          { id: '3', text: 'France guide' },
-        ],
-      };
-    } else if (lowerCaseMsg.includes('asia')) {
-      return {
-        message: 'Asia is a fascinating continent with diverse cultures and landscapes. Popular destinations include Japan, Thailand, Vietnam, and Indonesia. Would you like information on a specific Asian country?',
-        suggestions: [
-          { id: '1', text: 'Japan guide' },
-          { id: '2', text: 'Thailand guide' },
-          { id: '3', text: 'Vietnam guide' },
-        ],
-      };
-    }
-    
-    // Default response if no specific patterns match
+    // Default response for unclear queries
+    console.log('Using default response');
     return {
-      message: "I can help you plan your perfect trip! Tell me what kind of travel experience you're looking for - are you interested in cultural exploration, adventure activities, relaxation, or something else? I can also suggest destinations based on your budget and travel style, or check the weather for any city.",
+      message: "I'm here to help you plan the perfect trip! ✈️\n\nI can assist you with:\n• 🌍 **Destination recommendations** based on your interests\n• 🌤️ **Weather information** for any city\n• 💡 **Travel tips** and advice\n• 💰 **Budget-friendly options**\n• 🎯 **Activity suggestions**\n\nWhat would you like to explore?",
       suggestions: [
-        { id: '1', text: 'Cultural destinations' },
-        { id: '2', text: 'Budget-friendly options' },
-        { id: '3', text: 'Family vacation ideas' },
+        { id: '1', text: 'Popular destinations' },
+        { id: '2', text: 'Budget travel tips' },
+        { id: '3', text: 'Cultural experiences' },
+        { id: '4', text: 'Travel packages' }
       ],
     };
   };
 
   const sendMessage = (content: string) => {
     if (!content.trim()) return;
+    
+    console.log('Sending message:', content);
     
     // Add user message
     const userMessage: MessageType = {
@@ -629,20 +618,45 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     setMessages((prev) => [...prev, userMessage]);
     
+    // Clear suggested replies temporarily
+    setSuggestedReplies([]);
+    
     // Simulate bot thinking
     setTimeout(async () => {
-      const { message, suggestions } = await generateBotResponse(content);
-      
-      // Add bot response
-      const botMessage: MessageType = {
-        id: (Date.now() + 1).toString(),
-        content: message,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, botMessage]);
-      setSuggestedReplies(suggestions);
+      try {
+        const { message, suggestions } = await generateBotResponse(content);
+        
+        console.log('Bot response generated:', message);
+        console.log('New suggestions:', suggestions);
+        
+        // Add bot response
+        const botMessage: MessageType = {
+          id: (Date.now() + 1).toString(),
+          content: message,
+          sender: 'bot',
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, botMessage]);
+        setSuggestedReplies(suggestions);
+      } catch (error) {
+        console.error('Error generating bot response:', error);
+        
+        // Fallback response in case of error
+        const errorMessage: MessageType = {
+          id: (Date.now() + 1).toString(),
+          content: "I apologize, but I'm having trouble processing your request right now. Please try asking about destinations, travel tips, or weather information!",
+          sender: 'bot',
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, errorMessage]);
+        setSuggestedReplies([
+          { id: '1', text: 'Popular destinations' },
+          { id: '2', text: 'Travel tips' },
+          { id: '3', text: 'Budget options' },
+        ]);
+      }
     }, 1000);
   };
 
@@ -659,4 +673,3 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
-
