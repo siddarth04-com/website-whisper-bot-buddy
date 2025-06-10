@@ -542,7 +542,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
     // Handle activity-based queries
     if (lowerCaseMsg.includes('things to do in')) {
-      const cityMatch = userMessage.match(/things to do in\s+([a-zA-Z\s,]+)/i;
+      const cityMatch = userMessage.match(/things to do in\s+([a-zA-Z\s,]+)/i);
       if (cityMatch && cityMatch[1]) {
         const city = cityMatch[1].trim();
         console.log('Handling things to do request for:', city);
@@ -560,7 +560,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
     // Handle "Best time to visit" queries
     if (lowerCaseMsg.includes('best time to visit')) {
-      const cityMatch = userMessage.match(/best time to visit\s+([a-zA-Z\s,]+)/i;
+      const cityMatch = userMessage.match(/best time to visit\s+([a-zA-Z\s,]+)/i);
       if (cityMatch && cityMatch[1]) {
         const city = cityMatch[1].trim();
         console.log('Handling best time to visit request for:', city);
