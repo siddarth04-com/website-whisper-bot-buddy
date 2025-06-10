@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export type MessageType = {
@@ -65,15 +64,15 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
   const [messages, setMessages] = useState<MessageType[]>([
     {
       id: '1',
-      content: 'Hi there! 👋 I\'m your travel assistant. How can I help with your travel plans today?',
+      content: 'Namaste! 🙏 I\'m your India travel assistant. How can I help you explore the incredible diversity of India today?',
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
   const [suggestedReplies, setSuggestedReplies] = useState<SuggestedReplyType[]>([
-    { id: '1', text: 'Popular destinations' },
-    { id: '2', text: 'Travel packages' },
-    { id: '3', text: 'Travel tips' },
+    { id: '1', text: 'Popular Indian destinations' },
+    { id: '2', text: 'India travel packages' },
+    { id: '3', text: 'India travel tips' },
   ]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [travelPreferences, setTravelPreferences] = useState<TravelPreferences>({});
@@ -90,7 +89,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     try {
       console.log('Fetching weather data for:', city);
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${WEATHER_API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${city},IN&units=metric&appid=${WEATHER_API_KEY}`
       );
       
       if (!response.ok) {
@@ -114,18 +113,19 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     }
   };
 
-  // Get travel recommendations based on genre
+  // Get Indian travel recommendations based on genre
   const getTravelRecommendationsByGenre = (genre: string): string[] => {
     const genreMap: Record<string, string[]> = {
-      'cultural': ['Rome, Italy', 'Kyoto, Japan', 'Istanbul, Turkey', 'Athens, Greece', 'Cairo, Egypt'],
-      'adventure': ['Queenstown, New Zealand', 'Costa Rica', 'Swiss Alps', 'Moab, Utah', 'Patagonia, Argentina'],
-      'relaxation': ['Maldives', 'Bali, Indonesia', 'Santorini, Greece', 'Tulum, Mexico', 'Fiji'],
-      'food': ['Lyon, France', 'Tokyo, Japan', 'Bangkok, Thailand', 'Bologna, Italy', 'San Sebastian, Spain'],
-      'history': ['Petra, Jordan', 'Machu Picchu, Peru', 'Rome, Italy', 'Cairo, Egypt', 'Angkor Wat, Cambodia'],
-      'nature': ['Banff, Canada', 'Fiordland, New Zealand', 'Serengeti, Tanzania', 'Yosemite, USA', 'Amazon Rainforest, Brazil'],
-      'nightlife': ['Berlin, Germany', 'Bangkok, Thailand', 'Barcelona, Spain', 'Las Vegas, USA', 'Ibiza, Spain'],
-      'beach': ['Maldives', 'Seychelles', 'Amalfi Coast, Italy', 'Phi Phi Islands, Thailand', 'Maui, Hawaii'],
-      'city': ['Tokyo, Japan', 'New York, USA', 'London, UK', 'Paris, France', 'Singapore']
+      'cultural': ['Delhi', 'Varanasi', 'Jaipur', 'Agra', 'Hampi'],
+      'adventure': ['Manali', 'Rishikesh', 'Leh-Ladakh', 'Goa', 'Darjeeling'],
+      'relaxation': ['Kerala Backwaters', 'Goa', 'Udaipur', 'Shimla', 'Ooty'],
+      'food': ['Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Amritsar'],
+      'history': ['Delhi', 'Agra', 'Jaipur', 'Khajuraho', 'Ajanta Caves'],
+      'nature': ['Kerala', 'Himachal Pradesh', 'Uttarakhand', 'Karnataka', 'Meghalaya'],
+      'spiritual': ['Varanasi', 'Rishikesh', 'Amritsar', 'Bodh Gaya', 'Haridwar'],
+      'beach': ['Goa', 'Kerala', 'Andaman Islands', 'Puducherry', 'Maharashtra'],
+      'mountain': ['Manali', 'Shimla', 'Darjeeling', 'Mussoorie', 'Nainital'],
+      'heritage': ['Rajasthan', 'Delhi', 'Agra', 'Madhya Pradesh', 'Karnataka']
     };
     
     const normalizedGenre = genre.toLowerCase();
@@ -135,16 +135,16 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       }
     }
     
-    return ['Paris, France', 'Tokyo, Japan', 'New York, USA', 'Barcelona, Spain', 'Sydney, Australia'];
+    return ['Delhi', 'Agra', 'Jaipur', 'Kerala', 'Goa'];
   };
   
-  // Get travel recommendations based on budget
+  // Get Indian travel recommendations based on budget
   const getTravelRecommendationsByBudget = (budget: string): string[] => {
     const budgetMap: Record<string, string[]> = {
-      'low': ['Bangkok, Thailand', 'Hanoi, Vietnam', 'Budapest, Hungary', 'Mexico City, Mexico', 'Lisbon, Portugal'],
-      'medium': ['Barcelona, Spain', 'Prague, Czech Republic', 'Istanbul, Turkey', 'Bali, Indonesia', 'Montreal, Canada'],
-      'high': ['London, UK', 'Sydney, Australia', 'Reykjavik, Iceland', 'New York, USA', 'Tokyo, Japan'],
-      'luxury': ['Maldives', 'French Riviera', 'Santorini, Greece', 'Dubai, UAE', 'Swiss Alps']
+      'low': ['Rishikesh', 'Varanasi', 'Pushkar', 'Hampi', 'McLeod Ganj'],
+      'medium': ['Jaipur', 'Kerala', 'Goa', 'Udaipur', 'Manali'],
+      'high': ['Rajasthan Palaces', 'Kashmir', 'Andaman Islands', 'Sikkim', 'Coorg'],
+      'luxury': ['Rajasthan Heritage Hotels', 'Kerala Luxury Resorts', 'Goa Luxury Resorts', 'Himalayan Luxury Retreats', 'Palace Hotels Udaipur']
     };
     
     const normalizedBudget = budget.toLowerCase();
@@ -154,17 +154,17 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       }
     }
     
-    return ['Paris, France', 'Barcelona, Spain', 'Thailand', 'Portugal', 'Mexico'];
+    return ['Delhi', 'Agra', 'Jaipur', 'Kerala', 'Goa'];
   };
   
-  // Get travel recommendations based on trip style
+  // Get Indian travel recommendations based on trip style
   const getTravelRecommendationsByStyle = (style: string): string[] => {
     const styleMap: Record<string, string[]> = {
-      'solo': ['Lisbon, Portugal', 'Bangkok, Thailand', 'Tokyo, Japan', 'Berlin, Germany', 'Melbourne, Australia'],
-      'couple': ['Santorini, Greece', 'Paris, France', 'Kyoto, Japan', 'Amalfi Coast, Italy', 'Maldives'],
-      'family': ['Orlando, USA', 'Copenhagen, Denmark', 'London, UK', 'San Diego, USA', 'Singapore'],
-      'friends': ['Barcelona, Spain', 'Amsterdam, Netherlands', 'Las Vegas, USA', 'Phuket, Thailand', 'Ibiza, Spain'],
-      'luxury': ['Monaco', 'Maldives', 'Dubai, UAE', 'St. Barts', 'Lake Como, Italy']
+      'solo': ['Rishikesh', 'Varanasi', 'Hampi', 'Manali', 'Pushkar'],
+      'couple': ['Udaipur', 'Kerala', 'Goa', 'Shimla', 'Coorg'],
+      'family': ['Kerala', 'Goa', 'Rajasthan', 'Himachal Pradesh', 'Karnataka'],
+      'friends': ['Goa', 'Manali', 'Rishikesh', 'Jaisalmer', 'Andaman Islands'],
+      'luxury': ['Rajasthan Palace Hotels', 'Kerala Luxury Resorts', 'Kashmir Houseboats', 'Goa Luxury Resorts', 'Himalayan Luxury Lodges']
     };
     
     const normalizedStyle = style.toLowerCase();
@@ -174,7 +174,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       }
     }
     
-    return ['Rome, Italy', 'Bali, Indonesia', 'London, UK', 'Bangkok, Thailand', 'Barcelona, Spain'];
+    return ['Delhi', 'Agra', 'Jaipur', 'Kerala', 'Goa'];
   };
   
   // Update preferences based on user input
@@ -184,14 +184,15 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     // Check for genre/interests
     const genrePatterns = [
-      { regex: /\b(cultur|museum|histor|heritage)\w*\b/i, value: 'cultural' },
-      { regex: /\b(adventure|hiking|trek|thrilling|exciting)\w*\b/i, value: 'adventure' },
-      { regex: /\b(relax|calm|peaceful|spa|restful|beach)\w*\b/i, value: 'relaxation' },
-      { regex: /\b(food|cuisine|gastronom|culinary|eat)\w*\b/i, value: 'food' },
-      { regex: /\b(nature|wildlife|outdoors|landscape|scenic)\w*\b/i, value: 'nature' },
-      { regex: /\b(party|nightlife|club|bar|nightclub)\w*\b/i, value: 'nightlife' },
-      { regex: /\b(beach|ocean|sea|coast|marine)\w*\b/i, value: 'beach' },
-      { regex: /\b(urban|city|cities|metropolitan|cityscape)\w*\b/i, value: 'city' }
+      { regex: /\b(cultur|museum|histor|heritage|monument|temple|fort|palace)\w*\b/i, value: 'cultural' },
+      { regex: /\b(adventure|hiking|trek|thrilling|exciting|mountain|river)\w*\b/i, value: 'adventure' },
+      { regex: /\b(relax|calm|peaceful|spa|restful|beach|backwater)\w*\b/i, value: 'relaxation' },
+      { regex: /\b(food|cuisine|gastronom|culinary|eat|spice|street food)\w*\b/i, value: 'food' },
+      { regex: /\b(nature|wildlife|outdoors|landscape|scenic|forest|national park)\w*\b/i, value: 'nature' },
+      { regex: /\b(spiritual|religious|temple|ashram|meditation|yoga)\w*\b/i, value: 'spiritual' },
+      { regex: /\b(beach|ocean|sea|coast|marine|island)\w*\b/i, value: 'beach' },
+      { regex: /\b(mountain|hill|valley|peak|himalaya|snowfall)\w*\b/i, value: 'mountain' },
+      { regex: /\b(heritage|monument|fort|palace|architecture|ancient)\w*\b/i, value: 'heritage' }
     ];
     
     for (const pattern of genrePatterns) {
@@ -204,10 +205,10 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     
     // Check for budget
     const budgetPatterns = [
-      { regex: /\b(cheap|budget|affordable|inexpensive|low cost|low budget)\w*\b/i, value: 'low' },
+      { regex: /\b(cheap|budget|affordable|inexpensive|low cost|low budget|backpack)\w*\b/i, value: 'low' },
       { regex: /\b(moderate|reasonable|medium budget|mid-range)\w*\b/i, value: 'medium' },
       { regex: /\b(expensive|high budget|premium|high-end)\w*\b/i, value: 'high' },
-      { regex: /\b(luxury|luxurious|exclusive|deluxe|extravagant)\w*\b/i, value: 'luxury' }
+      { regex: /\b(luxury|luxurious|exclusive|deluxe|extravagant|palace|resort)\w*\b/i, value: 'luxury' }
     ];
     
     for (const pattern of budgetPatterns) {
@@ -267,11 +268,11 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     } else {
       // Default recommendations if no preferences detected
       recommendations = [
-        'Paris, France',
-        'Tokyo, Japan',
-        'Barcelona, Spain',
-        'New York, USA',
-        'Bali, Indonesia'
+        'Delhi',
+        'Agra',
+        'Jaipur',
+        'Kerala',
+        'Goa'
       ];
     }
     
@@ -287,106 +288,120 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     updateTravelPreferences(userMessage);
     
     // Handle specific input messages - exact matching first
-    if (lowerCaseMsg === 'popular destinations') {
-      console.log('Handling popular destinations request');
+    if (lowerCaseMsg === 'popular indian destinations' || lowerCaseMsg === 'popular destinations') {
+      console.log('Handling popular Indian destinations request');
       return {
-        message: "Here are some of the most popular travel destinations right now:\n\n" +
-                "🗼 **Paris, France** - The City of Light with iconic landmarks like the Eiffel Tower and Louvre\n" +
-                "🏯 **Tokyo, Japan** - Where ultramodern meets traditional culture\n" +
-                "🏖️ **Bali, Indonesia** - Beautiful beaches and spiritual retreats\n" +
-                "🏛️ **Barcelona, Spain** - Stunning architecture and vibrant Mediterranean culture\n" +
-                "🗽 **New York, USA** - The city that never sleeps\n\n" +
+        message: "Here are some of the most popular travel destinations in India:\n\n" +
+                "🏛️ **Delhi** - India's capital with Red Fort, India Gate, and rich Mughal heritage\n" +
+                "🕌 **Agra** - Home to the iconic Taj Mahal and Agra Fort\n" +
+                "🏰 **Jaipur** - The Pink City with majestic palaces and forts\n" +
+                "🌴 **Kerala** - God's Own Country with backwaters and spice plantations\n" +
+                "🏖️ **Goa** - Beautiful beaches and Portuguese colonial charm\n\n" +
                 "Which destination interests you most? I can provide detailed information about any of these places!",
         suggestions: [
-          { id: '1', text: 'Tell me about Paris' },
-          { id: '2', text: 'Tell me about Tokyo' },
-          { id: '3', text: 'Tell me about Bali' },
-          { id: '4', text: 'Show me budget options' }
+          { id: '1', text: 'Tell me about Delhi' },
+          { id: '2', text: 'Tell me about Kerala' },
+          { id: '3', text: 'Tell me about Rajasthan' },
+          { id: '4', text: 'Budget travel in India' }
         ]
       };
     }
     
-    // Handle "Travel packages" suggestion
-    if (lowerCaseMsg === 'travel packages') {
-      console.log('Handling travel packages request');
+    // Handle "India travel packages" suggestion
+    if (lowerCaseMsg === 'india travel packages' || lowerCaseMsg === 'travel packages') {
+      console.log('Handling India travel packages request');
       return {
-        message: 'I can help you find the perfect travel package! What type of experience are you looking for?',
+        message: 'I can help you find the perfect India travel package! What type of Indian experience are you looking for?',
         suggestions: [
-          { id: '1', text: 'Beach vacations' },
-          { id: '2', text: 'City breaks' },
-          { id: '3', text: 'Adventure tours' },
-          { id: '4', text: 'Cultural experiences' }
+          { id: '1', text: 'Golden Triangle tour' },
+          { id: '2', text: 'Kerala backwaters' },
+          { id: '3', text: 'Rajasthan heritage' },
+          { id: '4', text: 'Himalayan adventure' }
         ],
       };
     }
     
-    // Handle "Travel tips" suggestion
-    if (lowerCaseMsg === 'travel tips') {
-      console.log('Handling travel tips request');
+    // Handle "India travel tips" suggestion
+    if (lowerCaseMsg === 'india travel tips' || lowerCaseMsg === 'travel tips') {
+      console.log('Handling India travel tips request');
       return {
-        message: 'Here are some essential travel tips to make your trip amazing:\n\n' +
-                '✈️ **Planning Tips:**\n' +
-                '• Book flights 6-8 weeks in advance for best rates\n' +
-                '• Get travel insurance for peace of mind\n' +
-                '• Check visa requirements early\n\n' +
-                '🎒 **Packing Smart:**\n' +
-                '• Pack light - you can always buy what you need\n' +
-                '• Bring copies of important documents\n' +
-                '• Pack essentials in carry-on\n\n' +
-                'What specific aspect of travel would you like more tips about?',
+        message: 'Here are essential tips for traveling in India:\n\n' +
+                '🛂 **Before You Go:**\n' +
+                '• Get an e-Visa or tourist visa in advance\n' +
+                '• Vaccinations recommended (consult your doctor)\n' +
+                '• Best time: October to March for most regions\n\n' +
+                '💰 **Money & Budget:**\n' +
+                '• Carry cash (INR) - many places don\'t accept cards\n' +
+                '• Bargaining is common in markets\n' +
+                '• Tipping is appreciated (10-15%)\n\n' +
+                '🍛 **Food & Health:**\n' +
+                '• Drink bottled water\n' +
+                '• Try street food but choose busy stalls\n' +
+                '• Vegetarian options available everywhere\n\n' +
+                'What specific aspect would you like more tips about?',
         suggestions: [
-          { id: '1', text: 'Packing tips' },
-          { id: '2', text: 'Safety advice' },
-          { id: '3', text: 'Budget travel tips' },
-          { id: '4', text: 'Local culture tips' }
+          { id: '1', text: 'Food safety in India' },
+          { id: '2', text: 'Transportation in India' },
+          { id: '3', text: 'Cultural etiquette' },
+          { id: '4', text: 'Budget planning' }
         ],
       };
     }
 
     // Handle more specific suggestion responses
-    if (lowerCaseMsg === 'cultural experiences' || lowerCaseMsg === 'cultural destinations') {
-      console.log('Handling cultural experiences request');
-      const culturalPlaces = getTravelRecommendationsByGenre('cultural');
+    if (lowerCaseMsg === 'golden triangle tour') {
+      console.log('Handling Golden Triangle tour request');
       return {
-        message: `Here are some incredible cultural destinations:\n\n🏛️ **${culturalPlaces[0]}** - Ancient ruins and Renaissance masterpieces\n🏯 **${culturalPlaces[1]}** - Traditional temples and zen gardens\n🕌 **${culturalPlaces[2]}** - Where East meets West with Byzantine heritage\n🏺 **${culturalPlaces[3]}** - Birthplace of democracy and philosophy\n🔺 **${culturalPlaces[4]}** - Home to ancient pyramids and pharaohs\n\nWhich cultural destination would you like to explore?`,
+        message: `🔺 **Golden Triangle Tour - India's Classic Circuit**\n\n**Delhi → Agra → Jaipur**\n\n🏛️ **Delhi (2-3 days)** - Red Fort, India Gate, Qutub Minar, Humayun's Tomb\n🕌 **Agra (1-2 days)** - Taj Mahal, Agra Fort, Mehtab Bagh\n🏰 **Jaipur (2-3 days)** - Hawa Mahal, City Palace, Amber Fort\n\n**Duration:** 6-8 days\n**Best Time:** October to March\n**Budget:** ₹15,000 - ₹50,000 per person\n\nWould you like a detailed itinerary for any city?`,
         suggestions: [
-          { id: '1', text: `Tell me about ${culturalPlaces[0]}` },
-          { id: '2', text: `Tell me about ${culturalPlaces[1]}` },
-          { id: '3', text: 'Budget cultural trips' },
-          { id: '4', text: 'Cultural travel tips' }
+          { id: '1', text: 'Delhi detailed itinerary' },
+          { id: '2', text: 'Best time to visit Golden Triangle' },
+          { id: '3', text: 'Golden Triangle budget breakdown' },
+          { id: '4', text: 'Transportation options' }
         ]
       };
     }
 
-    if (lowerCaseMsg === 'budget-friendly options' || lowerCaseMsg === 'show me budget options') {
-      console.log('Handling budget-friendly options request');
-      const budgetPlaces = getTravelRecommendationsByBudget('low');
+    if (lowerCaseMsg === 'kerala backwaters') {
+      console.log('Handling Kerala backwaters request');
       return {
-        message: `Here are excellent budget-friendly destinations:\n\n🍜 **${budgetPlaces[0]}** - Amazing street food and affordable luxury\n🏮 **${budgetPlaces[1]}** - Rich culture at unbeatable prices\n🏰 **${budgetPlaces[2]}** - European charm without the high costs\n🌮 **${budgetPlaces[3]}** - Vibrant culture and delicious cuisine\n🏘️ **${budgetPlaces[4]}** - Beautiful coastline and great value\n\nWould you like specific budget tips for any destination?`,
+        message: `🌴 **Kerala Backwaters - Nature's Paradise**\n\n**Top Backwater Destinations:**\n\n🚤 **Alleppey** - Houseboat cruises and paddy fields\n🏞️ **Kumarakom** - Bird sanctuary and luxury resorts\n🌿 **Kollam** - Ashtamudi Lake and coconut groves\n🎣 **Kottayam** - Vembanad Lake and spice plantations\n\n**Experience:** Traditional houseboat stays, canoe rides, village visits\n**Best Time:** December to February\n**Duration:** 3-5 days\n\nWhat aspect of Kerala interests you most?`,
         suggestions: [
-          { id: '1', text: `Budget guide for ${budgetPlaces[0]}` },
-          { id: '2', text: 'Money-saving travel tips' },
-          { id: '3', text: 'Affordable accommodations' },
-          { id: '4', text: 'Cheap flight tips' }
+          { id: '1', text: 'Houseboat experience' },
+          { id: '2', text: 'Kerala cuisine' },
+          { id: '3', text: 'Ayurveda in Kerala' },
+          { id: '4', text: 'Kerala hill stations' }
         ]
       };
     }
 
-    if (lowerCaseMsg === 'family vacation ideas') {
-      console.log('Handling family vacation ideas request');
-      const familyPlaces = getTravelRecommendationsByStyle('family');
+    if (lowerCaseMsg === 'rajasthan heritage') {
+      console.log('Handling Rajasthan heritage request');
       return {
-        message: `Perfect family-friendly destinations:\n\n🎢 **${familyPlaces[0]}** - Theme parks and magical experiences\n🧸 **${familyPlaces[1]}** - Safe, clean, and kid-friendly attractions\n🎭 **${familyPlaces[2]}** - Museums and history come alive\n🌊 **${familyPlaces[3]}** - Beautiful beaches and family activities\n🎡 **${familyPlaces[4]}** - Modern city with amazing family attractions\n\nWhat type of family experience are you looking for?`,
+        message: `🏰 **Rajasthan Heritage - Land of Kings**\n\n**Royal Cities to Explore:**\n\n👑 **Jaipur** - Pink City with City Palace and Hawa Mahal\n🏛️ **Udaipur** - City of Lakes with magnificent palaces\n🏜️ **Jaisalmer** - Golden City with desert safari\n🕌 **Jodhpur** - Blue City with Mehrangarh Fort\n🎪 **Pushkar** - Holy city with camel fair\n\n**Highlights:** Palace hotels, desert camps, folk performances, traditional crafts\n**Best Time:** October to March\n\nWhich royal city would you like to explore first?`,
         suggestions: [
-          { id: '1', text: 'Beach family vacation' },
-          { id: '2', text: 'Educational travel with kids' },
-          { id: '3', text: 'Theme park holidays' },
-          { id: '4', text: 'Adventure for families' }
+          { id: '1', text: 'Udaipur palace hotels' },
+          { id: '2', text: 'Jaisalmer desert safari' },
+          { id: '3', text: 'Rajasthan cultural experiences' },
+          { id: '4', text: 'Best Rajasthan itinerary' }
+        ]
+      };
+    }
+
+    if (lowerCaseMsg === 'himalayan adventure') {
+      console.log('Handling Himalayan adventure request');
+      return {
+        message: `🏔️ **Himalayan Adventure - Mountain Majesty**\n\n**Adventure Destinations:**\n\n❄️ **Leh-Ladakh** - High altitude desert and monasteries\n🏔️ **Manali** - Snow peaks and adventure sports\n🧘 **Rishikesh** - Yoga capital and white water rafting\n🌸 **Dharamshala** - Dalai Lama's residence and trekking\n🚠 **Shimla** - Hill station and toy train rides\n\n**Activities:** Trekking, river rafting, paragliding, monastery visits\n**Best Time:** May to October (varies by region)\n\nWhat type of mountain adventure excites you?`,
+        suggestions: [
+          { id: '1', text: 'Leh-Ladakh road trip' },
+          { id: '2', text: 'Himalayan trekking' },
+          { id: '3', text: 'Adventure sports in India' },
+          { id: '4', text: 'Mountain weather info' }
         ]
       };
     }
     
-    // Handle weather queries
+    // Handle weather queries with India focus
     const weatherRegex = /weather\s+(?:in|at|for)?\s+([a-zA-Z\s]+)/i;
     const weatherMatch = userMessage.match(weatherRegex);
     
@@ -403,23 +418,23 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
             { id: '1', text: `Things to do in ${weather.city}` },
             { id: '2', text: `Best time to visit ${weather.city}` },
             { id: '3', text: `${weather.city} travel guide` },
-            { id: '4', text: 'Show similar destinations' },
+            { id: '4', text: 'Similar Indian destinations' },
           ],
         };
       } else {
         return {
-          message: `I couldn't find weather information for "${city}". Please check the city name and try again.`,
+          message: `I couldn't find weather information for "${city}". Please check the city name and try again. I specialize in Indian destinations!`,
           suggestions: [
-            { id: '1', text: 'Weather in Paris' },
-            { id: '2', text: 'Weather in Tokyo' },
-            { id: '3', text: 'Weather in New York' },
-            { id: '4', text: 'Popular destinations' },
+            { id: '1', text: 'Weather in Delhi' },
+            { id: '2', text: 'Weather in Mumbai' },
+            { id: '3', text: 'Weather in Kerala' },
+            { id: '4', text: 'Popular Indian destinations' },
           ],
         };
       }
     }
     
-    // Handle "Tell me about X" for destinations
+    // Handle "Tell me about X" for Indian destinations
     const tellMeAboutRegex = /tell me about\s+([a-zA-Z\s,]+)/i;
     const tellMeAboutMatch = userMessage.match(tellMeAboutRegex);
 
@@ -427,27 +442,31 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       console.log('Handling tell me about request for:', tellMeAboutMatch[1]);
       const destination = tellMeAboutMatch[1].trim();
       
-      // Destination information database
+      // Indian destination information database
       const destinationInfo: Record<string, { info: string; highlights: string[] }> = {
-        'paris': {
-          info: 'Paris, the capital of France, is known for iconic landmarks like the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral. The city offers world-class dining, art, and fashion experiences.',
-          highlights: ['Eiffel Tower', 'Louvre Museum', 'Champs-Élysées', 'Montmartre', 'Seine River cruises']
+        'delhi': {
+          info: 'Delhi, India\'s capital, is a vibrant metropolis blending ancient history with modernity. From Mughal monuments to bustling markets, Delhi offers an incredible cultural experience.',
+          highlights: ['Red Fort', 'India Gate', 'Qutub Minar', 'Lotus Temple', 'Chandni Chowk']
         },
-        'tokyo': {
-          info: 'Tokyo is Japan\'s vibrant capital mixing ultramodern and traditional aspects. Visit the Meiji Shrine, Imperial Palace, and experience incredible food culture.',
-          highlights: ['Shibuya Crossing', 'Senso-ji Temple', 'Tokyo Skytree', 'Tsukiji Market', 'Harajuku district']
+        'agra': {
+          info: 'Agra is home to the magnificent Taj Mahal, one of the Seven Wonders of the World. This Mughal city showcases some of India\'s finest architectural treasures.',
+          highlights: ['Taj Mahal', 'Agra Fort', 'Mehtab Bagh', 'Fatehpur Sikri', 'Itmad-ud-Daulah']
         },
-        'barcelona': {
-          info: 'Barcelona, Spain\'s cosmopolitan capital, is defined by Antoni Gaudí\'s whimsical architecture and vibrant Mediterranean culture.',
-          highlights: ['Sagrada Família', 'Park Güell', 'Las Ramblas', 'Gothic Quarter', 'Barceloneta Beach']
+        'jaipur': {
+          info: 'Jaipur, the Pink City, is Rajasthan\'s capital known for its royal palaces, vibrant culture, and magnificent forts that showcase Rajput architecture.',
+          highlights: ['Hawa Mahal', 'City Palace', 'Amber Fort', 'Jantar Mantar', 'Nahargarh Fort']
         },
-        'bali': {
-          info: 'Bali is an Indonesian island known for its volcanic mountains, iconic rice paddies, beaches, and coral reefs.',
-          highlights: ['Uluwatu Temple', 'Rice terraces', 'Seminyak beaches', 'Ubud culture', 'Mount Batur sunrise']
+        'kerala': {
+          info: 'Kerala, God\'s Own Country, is famous for its backwaters, spice plantations, Ayurvedic treatments, and pristine beaches along the Arabian Sea.',
+          highlights: ['Backwaters', 'Munnar hill station', 'Alleppey houseboats', 'Cochin heritage', 'Periyar wildlife']
         },
-        'new york': {
-          info: 'New York City comprises 5 boroughs where the Hudson River meets the Atlantic. Manhattan is among the world\'s major commercial and cultural centers.',
-          highlights: ['Times Square', 'Central Park', 'Statue of Liberty', 'Brooklyn Bridge', 'Broadway shows']
+        'goa': {
+          info: 'Goa combines Portuguese colonial charm with beautiful beaches, vibrant nightlife, and delicious seafood cuisine.',
+          highlights: ['Baga Beach', 'Old Goa churches', 'Dudhsagar Falls', 'Spice plantations', 'Anjuna market']
+        },
+        'rajasthan': {
+          info: 'Rajasthan, the Land of Kings, is India\'s largest state known for its desert landscapes, magnificent palaces, colorful culture, and royal heritage.',
+          highlights: ['Jaipur palaces', 'Udaipur lakes', 'Jaisalmer desert', 'Jodhpur fort', 'Pushkar temples']
         }
       };
       
@@ -466,22 +485,22 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       if (info) {
         const highlightText = highlights.map(h => `• ${h}`).join('\n');
         return {
-          message: `**${destination}** 🌟\n\n${info}\n\n**Top Highlights:**\n${highlightText}\n\nWhat would you like to know more about?`,
+          message: `**${destination}** 🇮🇳\n\n${info}\n\n**Top Highlights:**\n${highlightText}\n\nWhat would you like to know more about?`,
           suggestions: [
             { id: '1', text: `Weather in ${destination}` },
             { id: '2', text: `Things to do in ${destination}` },
             { id: '3', text: `Best time to visit ${destination}` },
-            { id: '4', text: 'Show me similar places' }
+            { id: '4', text: 'Similar Indian destinations' }
           ]
         };
       } else {
         return {
-          message: `I'd love to help you learn about ${destination}! While I don't have specific details about that destination yet, I can help you with popular destinations and travel planning.`,
+          message: `I'd love to help you learn about ${destination}! While I don't have specific details about that destination yet, I can help you with popular Indian destinations and travel planning.`,
           suggestions: [
-            { id: '1', text: 'Popular destinations' },
-            { id: '2', text: 'Cultural experiences' },
-            { id: '3', text: 'Budget-friendly options' },
-            { id: '4', text: 'Travel tips' }
+            { id: '1', text: 'Popular Indian destinations' },
+            { id: '2', text: 'Cultural experiences in India' },
+            { id: '3', text: 'Budget travel in India' },
+            { id: '4', text: 'India travel tips' }
           ]
         };
       }
@@ -497,27 +516,27 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
       const recommendations = getDestinationRecommendations();
       const { genre, budget, style } = travelPreferences;
       
-      let preferencesText = 'Based on popular choices';
+      let preferencesText = 'Based on popular Indian destinations';
       if (genre || budget || style) {
-        preferencesText = 'Based on your preferences';
+        preferencesText = 'Based on your preferences for India travel';
         if (genre) preferencesText += ` for ${genre} experiences`;
         if (budget) preferencesText += ` with a ${budget} budget`;
         if (style) preferencesText += ` and ${style} travel style`;
       }
       
       return {
-        message: `${preferencesText}, here are my top recommendations:\n\n` + 
-                 `🌟 **${recommendations[0]}**\n` +
-                 `🌟 **${recommendations[1]}**\n` +
-                 `🌟 **${recommendations[2]}**\n` +
-                 `🌟 **${recommendations[3]}**\n` +
-                 `🌟 **${recommendations[4]}**\n\n` +
-                 `Which destination would you like to explore further?`,
+        message: `${preferencesText}, here are my top Indian recommendations:\n\n` + 
+                 `🇮🇳 **${recommendations[0]}**\n` +
+                 `🇮🇳 **${recommendations[1]}**\n` +
+                 `🇮🇳 **${recommendations[2]}**\n` +
+                 `🇮🇳 **${recommendations[3]}**\n` +
+                 `🇮🇳 **${recommendations[4]}**\n\n` +
+                 `Which Indian destination would you like to explore further?`,
         suggestions: [
           { id: '1', text: `Tell me about ${recommendations[0]}` },
           { id: '2', text: `Tell me about ${recommendations[1]}` },
-          { id: '3', text: 'Refine my preferences' },
-          { id: '4', text: 'Budget travel tips' }
+          { id: '3', text: 'Refine my India preferences' },
+          { id: '4', text: 'Budget travel in India' }
         ]
       };
     }
@@ -547,11 +566,11 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         const city = cityMatch[1].trim();
         console.log('Handling things to do request for:', city);
         return {
-          message: `Here are top activities in ${city}:\n\n🏛️ **Explore landmarks** - Visit iconic sights and monuments\n🎨 **Cultural sites** - Museums, galleries, and historical places\n🍽️ **Local cuisine** - Try authentic restaurants and street food\n🛍️ **Shopping** - Local markets and unique boutiques\n🌃 **Nightlife** - Bars, clubs, and entertainment venues\n\nWhat type of activity interests you most?`,
+          message: `Here are top activities in ${city}, India:\n\n🏛️ **Historical sites** - Visit monuments and heritage buildings\n🎨 **Cultural experiences** - Museums, art galleries, and local traditions\n🍽️ **Local cuisine** - Try authentic Indian restaurants and street food\n🛍️ **Shopping** - Local markets, handicrafts, and textiles\n🎭 **Local culture** - Festivals, performances, and traditions\n\nWhat type of activity interests you most?`,
           suggestions: [
-            { id: '1', text: `Museums in ${city}` },
-            { id: '2', text: `Restaurants in ${city}` },
-            { id: '3', text: `Nightlife in ${city}` },
+            { id: '1', text: `Historical sites in ${city}` },
+            { id: '2', text: `Local food in ${city}` },
+            { id: '3', text: `Shopping in ${city}` },
             { id: '4', text: `Weather in ${city}` }
           ]
         };
@@ -565,12 +584,12 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         const city = cityMatch[1].trim();
         console.log('Handling best time to visit request for:', city);
         return {
-          message: `**Best time to visit ${city}:**\n\n🌤️ **Spring (Apr-May)** - Pleasant weather, fewer crowds\n☀️ **Summer (Jun-Aug)** - Peak season, warm weather\n🍂 **Fall (Sep-Oct)** - Great weather, beautiful colors\n❄️ **Winter (Nov-Mar)** - Off-season, potential savings\n\nThe ideal time depends on your preferences for weather, crowds, and budget!`,
+          message: `**Best time to visit ${city}, India:**\n\n🌤️ **October-March** - Pleasant weather, peak tourist season\n☀️ **Summer (Apr-Jun)** - Hot weather, fewer crowds\n🌧️ **Monsoon (Jul-Sep)** - Rainy season, lush landscapes\n❄️ **Winter (Nov-Feb)** - Cool and comfortable, ideal for sightseeing\n\nNote: Best time varies by region in India. Northern plains are best in winter, while some hill stations are perfect in summer!`,
           suggestions: [
             { id: '1', text: `Weather in ${city}` },
             { id: '2', text: `${city} travel tips` },
             { id: '3', text: `Things to do in ${city}` },
-            { id: '4', text: 'Seasonal travel advice' }
+            { id: '4', text: 'Seasonal travel advice for India' }
           ]
         };
       }
@@ -593,12 +612,12 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     // Default response for unclear queries
     console.log('Using default response');
     return {
-      message: "I'm here to help you plan the perfect trip! ✈️\n\nI can assist you with:\n• 🌍 **Destination recommendations** based on your interests\n• 🌤️ **Weather information** for any city\n• 💡 **Travel tips** and advice\n• 💰 **Budget-friendly options**\n• 🎯 **Activity suggestions**\n\nWhat would you like to explore?",
+      message: "Namaste! I'm here to help you explore incredible India! 🇮🇳\n\nI can assist you with:\n• 🏛️ **Popular Indian destinations** like Delhi, Agra, Kerala, Rajasthan\n• 🌤️ **Weather information** for Indian cities\n• 💡 **India-specific travel tips** and cultural guidance\n• 💰 **Budget-friendly options** across India\n• 🎯 **Activity suggestions** for Indian destinations\n\nWhat aspect of India would you like to explore?",
       suggestions: [
-        { id: '1', text: 'Popular destinations' },
-        { id: '2', text: 'Budget travel tips' },
-        { id: '3', text: 'Cultural experiences' },
-        { id: '4', text: 'Travel packages' }
+        { id: '1', text: 'Popular Indian destinations' },
+        { id: '2', text: 'India travel tips' },
+        { id: '3', text: 'Golden Triangle tour' },
+        { id: '4', text: 'Kerala backwaters' }
       ],
     };
   };
@@ -645,16 +664,16 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
         // Fallback response in case of error
         const errorMessage: MessageType = {
           id: (Date.now() + 1).toString(),
-          content: "I apologize, but I'm having trouble processing your request right now. Please try asking about destinations, travel tips, or weather information!",
+          content: "I apologize, but I'm having trouble processing your request right now. Please try asking about Indian destinations, travel tips, or weather information!",
           sender: 'bot',
           timestamp: new Date(),
         };
         
         setMessages((prev) => [...prev, errorMessage]);
         setSuggestedReplies([
-          { id: '1', text: 'Popular destinations' },
-          { id: '2', text: 'Travel tips' },
-          { id: '3', text: 'Budget options' },
+          { id: '1', text: 'Popular Indian destinations' },
+          { id: '2', text: 'India travel tips' },
+          { id: '3', text: 'Budget travel in India' },
         ]);
       }
     }, 1000);
@@ -673,3 +692,5 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
+
+export default ChatProvider;
