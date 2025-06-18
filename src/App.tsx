@@ -5,9 +5,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { ChatProvider } from "./context/ChatContext";
+import { AuthProvider } from "./context/AuthContext";
 import ChatBot from "./components/chat/ChatBot";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -16,16 +19,23 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <ChatProvider>
+      <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <ChatProvider>
+                  <Index />
+                  <ChatBot />
+                </ChatProvider>
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ChatBot />
         </BrowserRouter>
-      </ChatProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
