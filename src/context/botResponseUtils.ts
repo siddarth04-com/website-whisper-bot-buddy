@@ -1,16 +1,193 @@
-
 import { SuggestedReplyType, TravelPreferences, WeatherData } from './types';
 import { fetchWeatherData } from './weatherUtils';
 import { getDestinationRecommendations, getDestinationDetails, getDestinationsByState } from './travelUtils';
+import { generateDynamicResponse } from './enhancedBotUtils';
+import { searchFlights, searchHotels, formatFlightResults, formatHotelResults } from './flightHotelUtils';
+import { formatMapResponse, generateRouteInfo } from './mapUtils';
+import { getCurrentTravelAlerts, getLiveUpdates, formatTravelAlerts, formatLiveUpdates } from './liveUpdatesUtils';
+
+// Store conversation history for context
+let conversationHistory: string[] = [];
 
 export const generateBotResponse = async (
   userMessage: string,
   travelPreferences: TravelPreferences,
   setWeatherData: (data: WeatherData | null) => void
 ): Promise<{ message: string; suggestions: SuggestedReplyType[] }> => {
-  console.log('Generating bot response for:', userMessage);
+  console.log('Generating enhanced bot response for:', userMessage);
+  
+  // Add to conversation history
+  conversationHistory.push(userMessage);
+  if (conversationHistory.length > 10) {
+    conversationHistory = conversationHistory.slice(-10); // Keep last 10 messages
+  }
+  
   const lowerCaseMsg = userMessage.toLowerCase().trim();
   
+  // Handle flight price searches
+  if (lowerCaseMsg.includes('flight') && (lowerCaseMsg.includes('price') || lowerCaseMsg.includes('search') || lowerCaseMsg.includes('check'))) {
+    console.log('Handling flight search request');
+    
+    // Extract cities from message (basic parsing)
+    const flightRegex = /(?:from|flight)\s+([a-zA-Z\s]+)\s+(?:to|→)\s+([a-zA-Z\s]+)|flight.*?(?:to|in)\s+([a-zA-Z\s]+)/i;
+    const match = userMessage.match(flightRegex);
+    
+    if (match) {
+      const origin = match[1]?.trim() || 'Delhi';
+      const destination = match[2] || match[3]?.trim() || 'Mumbai';
+      
+      try {
+        const flights = await searchFlights(origin, destination, new Date().toISOString().split('T')[0]);
+        const flightResults = formatFlightResults(flights);
+        
+        return {
+          message: flightResults,
+          suggestions: [
+            { id: '1', text: 'Compare airlines' },
+            { id: '2', text: 'Check hotels in ' + destination },
+            { id: '3', text: 'Route planning to ' + destination },
+            { id: '4', text: 'Travel alerts for ' + destination }
+          ]
+        };
+      } catch (error) {
+        console.error('Flight search error:', error);
+      }
+    }
+    
+    return {
+      message: `✈️ **FLIGHT SEARCH**\n\nI can help you find the best flight deals in India! Please specify:\n\n📍 **From which city?** (Delhi, Mumbai, Bangalore, etc.)\n📍 **To which destination?**\n📅 **Travel dates?**\n\nExample: "Flight from Delhi to Goa on December 25th"\n\n🎯 **Popular routes I can search:**\n• Delhi ↔ Mumbai, Bangalore, Chennai\n• Mumbai ↔ Goa, Hyderabad, Kolkata\n• Bangalore ↔ Chennai, Kochi, Pune`,
+      suggestions: [
+        { id: '1', text: 'Flight from Delhi to Mumbai' },
+        { id: '2', text: 'Flight to Goa' },
+        { id: '3', text: 'Bangalore to Chennai flight' },
+        { id: '4', text: 'Best time to book flights' }
+      ]
+    };
+  }
+  
+  // Handle hotel searches
+  if (lowerCaseMsg.includes('hotel') && (lowerCaseMsg.includes('search') || lowerCaseMsg.includes('find') || lowerCaseMsg.includes('book') || lowerCaseMsg.includes('price'))) {
+    console.log('Handling hotel search request');
+    
+    const hotelRegex = /hotel.*?(?:in|at)\s+([a-zA-Z\s]+)/i;
+    const match = userMessage.match(hotelRegex);
+    
+    if (match) {
+      const location = match[1].trim();
+      
+      try {
+        const hotels = await searchHotels(location, new Date().toISOString().split('T')[0], 
+          new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]);
+        const hotelResults = formatHotelResults(hotels);
+        
+        return {
+          message: hotelResults,
+          suggestions: [
+            { id: '1', text: 'Budget hotels in ' + location },
+            { id: '2', text: 'Luxury hotels in ' + location },
+            { id: '3', text: 'Hotel booking tips' },
+            { id: '4', text: 'Things to do in ' + location }
+          ]
+        };
+      } catch (error) {
+        console.error('Hotel search error:', error);
+      }
+    }
+    
+    return {
+      message: `🏨 **HOTEL SEARCH**\n\nI can find the best hotels across India for you!\n\n📝 **Please specify:**\n• 📍 Which city/destination?\n• 📅 Check-in date?\n• 📅 Check-out date?\n• 👥 Number of guests?\n\nExample: "Hotels in Jaipur for 2 guests"\n\n🏆 **I search across all categories:**\n• 💰 Budget stays (₹1000-3000/night)\n• 🏨 Mid-range hotels (₹3000-8000/night)\n• 🌟 Luxury resorts (₹8000+/night)\n• 🏛️ Heritage properties\n• 🏠 Homestays & guesthouses`,
+      suggestions: [
+        { id: '1', text: 'Hotels in Jaipur' },
+        { id: '2', text: 'Budget hotels in Goa' },
+        { id: '3', text: 'Luxury hotels in Kerala' },
+        { id: '4', text: 'Heritage hotels in Rajasthan' }
+      ]
+    };
+  }
+  
+  // Handle map and route requests
+  if (lowerCaseMsg.includes('map') || lowerCaseMsg.includes('show me') || lowerCaseMsg.includes('route') || lowerCaseMsg.includes('direction')) {
+    console.log('Handling map/route request');
+    
+    const cityRegex = /(?:map|show|route).*?(?:of|to|in)\s+([a-zA-Z\s]+)/i;
+    const match = userMessage.match(cityRegex);
+    
+    if (match) {
+      const city = match[1].trim();
+      const mapResponse = formatMapResponse(city);
+      
+      return {
+        message: mapResponse,
+        suggestions: [
+          { id: '1', text: `Route to ${city}` },
+          { id: '2', text: `Transportation in ${city}` },
+          { id: '3', text: `Tourist attractions ${city}` },
+          { id: '4', text: `Hotels near ${city}` }
+        ]
+      };
+    }
+    
+    return {
+      message: `🗺️ **INTERACTIVE MAP FEATURES**\n\nI can provide detailed maps and navigation for any Indian destination!\n\n🎯 **What I can show you:**\n• 📍 Exact coordinates of cities & attractions\n• 🎪 Nearby tourist spots with ratings\n• 🛣️ Route planning between destinations\n• 🚗 Distance & travel time estimates\n• 🚌 Transportation options\n\n💡 **Try asking:**\n• "Show me map of Delhi"\n• "Route from Mumbai to Goa"\n• "Attractions near Jaipur"\n• "How to reach Taj Mahal from Delhi"`,
+      suggestions: [
+        { id: '1', text: 'Show me map of Delhi' },
+        { id: '2', text: 'Route from Mumbai to Goa' },
+        { id: '3', text: 'Map of Rajasthan attractions' },
+        { id: '4', text: 'Navigation tips for India' }
+      ]
+    };
+  }
+  
+  // Handle live updates and travel alerts
+  if (lowerCaseMsg.includes('update') || lowerCaseMsg.includes('alert') || lowerCaseMsg.includes('current') || lowerCaseMsg.includes('live') || lowerCaseMsg.includes('condition')) {
+    console.log('Handling live updates request');
+    
+    try {
+      const destinations = extractDestinations(userMessage, travelPreferences);
+      const [alerts, updates] = await Promise.all([
+        getCurrentTravelAlerts(destinations),
+        getLiveUpdates()
+      ]);
+      
+      const alertsText = formatTravelAlerts(alerts);
+      const updatesText = formatLiveUpdates(updates);
+      
+      return {
+        message: `${alertsText}\n\n${updatesText}`,
+        suggestions: [
+          { id: '1', text: 'Weather updates' },
+          { id: '2', text: 'Transport status' },
+          { id: '3', text: 'Safety advisories' },
+          { id: '4', text: 'Festival calendar' }
+        ]
+      };
+    } catch (error) {
+      console.error('Live updates error:', error);
+    }
+    
+    return {
+      message: `📡 **LIVE TRAVEL UPDATES**\n\nI provide real-time information to make your India travel smooth!\n\n🔄 **Live Information:**\n• 🌤️ Weather conditions & forecasts\n• ✈️ Flight delays & airport status\n• 🚂 Train schedules & platform changes\n• 🛣️ Road conditions & traffic updates\n• 🎉 Festival dates & crowd expectations\n• ⚠️ Safety advisories & travel alerts\n\n💡 **Ask for specific updates:**\n• "Current conditions in Delhi"\n• "Travel alerts for my trip"\n• "Live weather in Goa"\n• "Transport updates Mumbai"`,
+      suggestions: [
+        { id: '1', text: 'Current travel conditions' },
+        { id: '2', text: 'Weather alerts India' },
+        { id: '3', text: 'Airport status updates' },
+        { id: '4', text: 'Road conditions check' }
+      ]
+    };
+  }
+  
+  // Use enhanced dynamic responses for other queries
+  if (conversationHistory.length > 1) {
+    try {
+      const dynamicResponse = await generateDynamicResponse(userMessage, conversationHistory, travelPreferences);
+      if (dynamicResponse) {
+        return dynamicResponse;
+      }
+    } catch (error) {
+      console.error('Dynamic response error:', error);
+    }
+  }
+
   // Handle specific input messages - exact matching first
   if (lowerCaseMsg === 'popular indian destinations' || lowerCaseMsg === 'popular destinations') {
     console.log('Handling popular Indian destinations request');
@@ -221,14 +398,33 @@ export const generateBotResponse = async (
   }
 
   // Default response for unclear queries
-  console.log('Using default response');
+  console.log('Using enhanced default response');
   return {
-    message: "🙏 **Namaste! Welcome to Incredible India!** 🇮🇳\n\nI'm your personal India travel assistant with comprehensive knowledge of:\n\n🏛️ **28 States & 8 Union Territories** - From Kashmir to Kanyakumari\n🌟 **1000+ Destinations** - Popular & offbeat places\n🎯 **Personalized Recommendations** - Based on your preferences\n🌤️ **Real-time Weather** - For planning your trips\n💰 **Budget Options** - Backpacker to luxury experiences\n🍛 **Local Insights** - Food, culture, and traditions\n\n**Popular Categories:**\n• Historical & Cultural sites\n• Adventure & Trekking\n• Beaches & Backwaters\n• Spiritual & Wellness\n• Wildlife & Nature\n• Food & Festivals\n\nWhat aspect of Incredible India would you like to explore today?",
+    message: "🙏 **Namaste! Welcome to Your Enhanced India Travel Assistant!** 🇮🇳\n\nI'm now equipped with advanced features to make your India travel planning seamless:\n\n✈️ **Real-time Flight Prices** - Compare airlines instantly\n🏨 **Hotel Search** - Find perfect stays within budget\n🗺️ **Interactive Maps** - Routes, attractions & navigation\n📡 **Live Updates** - Weather, transport & travel alerts\n🎯 **Smart Recommendations** - Personalized based on your style\n🌤️ **Weather Forecasts** - Plan with current conditions\n\n**Try these enhanced features:**\n• \"Flight prices from Delhi to Goa\"\n• \"Hotels in Jaipur under ₹3000\"\n• \"Show me map of Kerala attractions\"\n• \"Current travel conditions in Mumbai\"\n\nWhat would you like to explore first?",
     suggestions: [
-      { id: '1', text: 'Popular Indian destinations' },
-      { id: '2', text: 'India travel tips' },
-      { id: '3', text: 'Golden Triangle tour' },
-      { id: '4', text: 'Kerala backwaters' }
+      { id: '1', text: 'Check flight prices to India' },
+      { id: '2', text: 'Find hotels in my destination' },
+      { id: '3', text: 'Show me live travel updates' },
+      { id: '4', text: 'Popular Indian destinations' }
     ],
   };
+};
+
+// Helper function to extract destinations from user message
+const extractDestinations = (message: string, preferences: TravelPreferences): string[] => {
+  const destinations: string[] = [];
+  const cities = ['delhi', 'mumbai', 'bangalore', 'kolkata', 'chennai', 'jaipur', 'agra', 'goa', 'kerala'];
+  
+  cities.forEach(city => {
+    if (message.toLowerCase().includes(city)) {
+      destinations.push(city);
+    }
+  });
+  
+  // If no specific destinations mentioned, use preferences or defaults
+  if (destinations.length === 0) {
+    destinations.push('delhi', 'mumbai'); // Default major cities
+  }
+  
+  return destinations;
 };
