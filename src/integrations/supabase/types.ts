@@ -440,6 +440,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_passes: {
+        Row: {
+          created_at: string | null
+          discount_percentage: number
+          expiry_date: string
+          first_use_completed: boolean
+          id: string
+          is_active: boolean
+          pass_type: string
+          purchase_date: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount_percentage: number
+          expiry_date: string
+          first_use_completed?: boolean
+          id?: string
+          is_active?: boolean
+          pass_type: string
+          purchase_date?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discount_percentage?: number
+          expiry_date?: string
+          first_use_completed?: boolean
+          id?: string
+          is_active?: boolean
+          pass_type?: string
+          purchase_date?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       posts_with_counts: {

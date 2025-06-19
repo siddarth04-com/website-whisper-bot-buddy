@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { MessageType, WeatherData, TravelPreferences } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
 import { Cloud, Sun, CloudSun, CloudRain, Wind, Volume2, VolumeX, Compass, MapPin } from 'lucide-react';
+import { useConversation } from '@11labs/react';
 
 interface ChatMessageProps {
   message: MessageType;
@@ -22,9 +23,9 @@ const WeatherCard = ({ data }: { data: WeatherData }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-[#D3E4FD]">
+    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-teal-200">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-medium text-[#33C3F0]">{data.city}</h3>
+        <h3 className="font-medium text-teal-600">{data.city}</h3>
         <div className="flex items-center">
           {getWeatherIcon(data.icon)}
         </div>
@@ -74,10 +75,10 @@ const DestinationRecommendations = ({ message }: { message: string }) => {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-[#D3E4FD]">
+    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-teal-200">
       <div className="flex items-center mb-2">
-        <Compass className="text-[#33C3F0] mr-2" size={20} />
-        <h3 className="font-medium text-[#33C3F0]">Recommended Destinations</h3>
+        <Compass className="text-teal-500 mr-2" size={20} />
+        <h3 className="font-medium text-teal-600">Recommended Destinations</h3>
       </div>
       <div className="grid grid-cols-1 gap-2 text-sm">
         {destinations.map((destination, index) => (
@@ -92,7 +93,7 @@ const DestinationRecommendations = ({ message }: { message: string }) => {
 };
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const isBot = message.sender === 'bot';
   const hasWeatherData = isBot && message.content.includes("Currently in ") && message.content.includes("°C with");
   const hasDestinations = isBot && message.content.includes("I recommend considering these destinations");
@@ -104,40 +105,58 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     if (match) city = match[1];
   }
 
-  // Text to speech functionality
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Configure speech properties
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      
-      // Get available voices and set a good one if available
-      const voices = window.speechSynthesis.getVoices();
-      const englishVoices = voices.filter(voice => voice.lang.includes('en'));
-      if (englishVoices.length > 0) {
-        utterance.voice = englishVoices[0];
-      }
-      
-      // Event handlers
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      
-      // Start speaking
-      window.speechSynthesis.speak(utterance);
+  // Eleven Labs text to speech functionality
+  const generateSpeech = async (text: string) => {
+    if (isPlaying) {
+      // Stop current audio if playing
+      setIsPlaying(false);
+      return;
     }
-  };
 
-  const stopSpeaking = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+    try {
+      setIsPlaying(true);
+      
+      // Call Supabase Edge Function for Eleven Labs TTS
+      const response = await fetch('/api/text-to-speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          voice: 'Sarah' // Using Sarah voice (EXAVITQu4vr4xnSDxMaL)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate speech');
+      }
+
+      const { audioContent } = await response.json();
+      
+      // Convert base64 to audio and play
+      const audioBlob = new Blob([
+        new Uint8Array(atob(audioContent).split('').map(c => c.charCodeAt(0)))
+      ], { type: 'audio/mp3' });
+      
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      audio.onerror = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      await audio.play();
+      
+    } catch (error) {
+      console.error('Error generating speech:', error);
+      setIsPlaying(false);
     }
   };
 
@@ -149,16 +168,20 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
     >
       {isBot && (
-        <div className="w-8 h-8 rounded-full bg-[#33C3F0] flex items-center justify-center mr-2 flex-shrink-0">
-          <span className="text-white text-xs">🌍</span>
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-green-400 flex items-center justify-center mr-2 flex-shrink-0">
+          <img 
+            src="/lovable-uploads/26488c0d-314f-44e7-b1b6-913a3e7898d1.png" 
+            alt="Bot" 
+            className="w-6 h-6 object-contain"
+          />
         </div>
       )}
       <div 
         className={cn(
           "px-4 py-3 rounded-lg max-w-[80%] shadow-sm relative",
           isBot 
-            ? "bg-white rounded-tl-none border-l-4 border-[#33C3F0]" 
-            : "bg-[#EBF8FF] rounded-tr-none"
+            ? "bg-white rounded-tl-none border-l-4 border-teal-500" 
+            : "bg-gradient-to-r from-green-100 to-teal-100 rounded-tr-none"
         )}
       >
         <p className="text-sm whitespace-pre-line">{message.content}</p>
@@ -182,32 +205,26 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         
         {isBot && (
           <div className="flex items-center justify-between mt-1">
-            <p className="text-xs text-gray-400">Travel Assistant</p>
-            {isSpeaking ? (
-              <button 
-                onClick={stopSpeaking} 
-                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
-                aria-label="Stop speaking"
-                title="Stop speaking"
-              >
-                <VolumeX size={16} />
-              </button>
-            ) : (
-              <button 
-                onClick={() => speak(message.content)} 
-                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
-                aria-label="Listen to response"
-                title="Listen to response"
-              >
-                <Volume2 size={16} />
-              </button>
-            )}
+            <p className="text-xs text-gray-500">Destination Guide</p>
+            <button 
+              onClick={() => generateSpeech(message.content)} 
+              className={cn(
+                "p-1 rounded-full transition-colors",
+                isPlaying 
+                  ? "text-teal-600 bg-teal-100" 
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+              aria-label={isPlaying ? "Stop speaking" : "Listen to response"}
+              title={isPlaying ? "Stop speaking" : "Listen to response"}
+            >
+              {isPlaying ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
           </div>
         )}
       </div>
       {!isBot && (
-        <div className="w-8 h-8 rounded-full bg-[#D3E4FD] flex items-center justify-center ml-2 flex-shrink-0">
-          <span className="text-[#33C3F0] text-xs">👤</span>
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-200 to-teal-200 flex items-center justify-center ml-2 flex-shrink-0">
+          <span className="text-teal-700 text-xs">👤</span>
         </div>
       )}
     </div>
