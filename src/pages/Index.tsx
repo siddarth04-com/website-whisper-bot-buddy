@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import UserMenu from '@/components/UserMenu';
+import WelcomeMessage from '@/components/WelcomeMessage';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -10,6 +11,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      {/* Welcome Message Overlay */}
+      <WelcomeMessage />
+      
       {/* Header with user menu */}
       <div className="absolute top-4 right-4">
         {user ? (
@@ -40,7 +44,7 @@ const Index = () => {
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibent mb-3">About Us</h2>
+            <h2 className="text-xl font-semibold mb-3">About Us</h2>
             <p className="text-gray-600">
               Learn about our mission, vision, and the dedicated team behind our company.
             </p>
