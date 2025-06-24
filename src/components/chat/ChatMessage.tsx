@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MessageType, WeatherData, TravelPreferences } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
@@ -179,7 +178,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0"
              style={{ backgroundColor: '#9FC854' }}>
           <img 
-            src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+            src="/lovable-uploads/5183a025-f3a1-4f67-b539-6e466dd19a3f.png" 
             alt="Nestled Bot" 
             className="w-6 h-6 object-contain"
           />

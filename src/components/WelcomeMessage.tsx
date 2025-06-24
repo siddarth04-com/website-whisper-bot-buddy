@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { X } from 'lucide-react';
@@ -44,7 +43,7 @@ const WelcomeMessage: React.FC = () => {
         <div className="space-y-6">
           <div className="flex justify-center">
             <img 
-              src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+              src="/lovable-uploads/5183a025-f3a1-4f67-b539-6e466dd19a3f.png" 
               alt="Nestled Welcome" 
               className="w-24 h-24 object-contain animate-3d-float"
             />

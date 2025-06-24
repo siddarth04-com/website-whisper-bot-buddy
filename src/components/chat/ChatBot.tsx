@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -126,7 +125,7 @@ const ChatBot: React.FC = () => {
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center animate-3d-spin-slow backdrop-blur-sm">
                 <img 
-                  src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+                  src="/lovable-uploads/5183a025-f3a1-4f67-b539-6e466dd19a3f.png" 
                   alt="Nestled Guide" 
                   className="w-6 h-6 object-contain"
                 />
@@ -224,7 +223,7 @@ const ChatBot: React.FC = () => {
           ) : (
             <div className={`transform transition-all duration-300 ${hover3D ? 'scale-110 rotate-6' : 'scale-100'}`}>
               <img 
-                src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+                src="/lovable-uploads/5183a025-f3a1-4f67-b539-6e466dd19a3f.png" 
                 alt="Open Nestled Guide" 
                 className="w-8 h-8 object-contain drop-shadow-lg"
               />
