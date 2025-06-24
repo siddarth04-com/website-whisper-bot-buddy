@@ -44,8 +44,8 @@ const WelcomeMessage: React.FC = () => {
         <div className="space-y-6">
           <div className="flex justify-center">
             <img 
-              src="/lovable-uploads/26488c0d-314f-44e7-b1b6-913a3e7898d1.png" 
-              alt="Welcome" 
+              src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+              alt="Nestled Welcome" 
               className="w-24 h-24 object-contain animate-3d-float"
             />
           </div>

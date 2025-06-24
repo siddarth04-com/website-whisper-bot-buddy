@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { MessageType, WeatherData, TravelPreferences } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
@@ -178,8 +179,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0"
              style={{ backgroundColor: '#9FC854' }}>
           <img 
-            src="/lovable-uploads/26488c0d-314f-44e7-b1b6-913a3e7898d1.png" 
-            alt="Bot" 
+            src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+            alt="Nestled Bot" 
             className="w-6 h-6 object-contain"
           />
         </div>
@@ -218,7 +219,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         
         {isBot && (
           <div className="flex items-center justify-between mt-1">
-            <p className="text-xs" style={{ color: '#747377' }}>Destination Guide</p>
+            <p className="text-xs" style={{ color: '#747377' }}>Nestled Guide</p>
             <button 
               onClick={() => generateSpeech(message.content)} 
               className={cn(

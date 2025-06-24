@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -125,12 +126,12 @@ const ChatBot: React.FC = () => {
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center animate-3d-spin-slow backdrop-blur-sm">
                 <img 
-                  src="/lovable-uploads/26488c0d-314f-44e7-b1b6-913a3e7898d1.png" 
-                  alt="Website Guide" 
+                  src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+                  alt="Nestled Guide" 
                   className="w-6 h-6 object-contain"
                 />
               </div>
-              <h3 className="font-semibold text-shadow-lg">Website Guide</h3>
+              <h3 className="font-semibold text-shadow-lg">Nestled Guide</h3>
             </div>
             <div className="flex items-center gap-2 relative z-10">
               {/* 3D Position controls */}
@@ -223,8 +224,8 @@ const ChatBot: React.FC = () => {
           ) : (
             <div className={`transform transition-all duration-300 ${hover3D ? 'scale-110 rotate-6' : 'scale-100'}`}>
               <img 
-                src="/lovable-uploads/26488c0d-314f-44e7-b1b6-913a3e7898d1.png" 
-                alt="Open Guide" 
+                src="/lovable-uploads/47a78a09-1653-4df1-b457-9715e5f47906.png" 
+                alt="Open Nestled Guide" 
                 className="w-8 h-8 object-contain drop-shadow-lg"
               />
             </div>
