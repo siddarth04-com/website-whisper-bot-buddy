@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -106,14 +105,31 @@ const ChatInput: React.FC = () => {
   };
 
   return (
-    <div className="border-t border-gray-200 p-4 bg-white">
-      {/* Suggested replies with icons */}
+    <div className="border-t p-4" 
+         style={{ 
+           backgroundColor: '#E4E8EA', // Porcelain background
+           borderTopColor: '#9FC854' // Celery border
+         }}>
+      {/* Suggested replies with new colors */}
       {suggestedReplies.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {suggestedReplies.map((reply) => (
             <button
               key={reply.id}
-              className="bg-[#EBF8FF] border border-[#D3E4FD] hover:bg-[#D3E4FD] text-[#33C3F0] text-sm rounded-full px-3 py-1 transition-colors flex items-center"
+              className="text-sm rounded-full px-3 py-1 transition-colors flex items-center border"
+              style={{
+                backgroundColor: '#E4E8EA',
+                borderColor: '#9FC854',
+                color: '#9FC854'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#9FC854';
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#E4E8EA';
+                e.currentTarget.style.color = '#9FC854';
+              }}
               onClick={() => handleSuggestedReply(reply)}
             >
               {getSuggestionIcon(reply.text)}
@@ -123,25 +139,30 @@ const ChatInput: React.FC = () => {
         </div>
       )}
       
-      {/* Message input */}
+      {/* Message input with new colors */}
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={isListening ? "Listening..." : "Ask about destinations, tips, budget options, etc..."}
-          className={`flex-grow border-[#D3E4FD] focus-visible:ring-[#33C3F0] ${
-            isListening ? "border-[#33C3F0] bg-[#F0FAFF]" : ""
+          className={`flex-grow border focus-visible:ring-2 ${
+            isListening ? "bg-opacity-50" : ""
           }`}
+          style={{
+            borderColor: '#9FC854',
+            backgroundColor: isListening ? '#E4E8EA' : '#ffffff'
+          }}
         />
         
-        {/* Voice input button - only show if speech recognition is supported */}
+        {/* Voice input button */}
         {isRecognitionSupported && (
           <Button
             type="button"
             size="icon"
             variant={isListening ? "destructive" : "outline"}
             onClick={toggleListening}
-            className={isListening ? "bg-red-500 hover:bg-red-600" : "border-[#D3E4FD]"}
+            className={isListening ? "bg-red-500 hover:bg-red-600" : ""}
+            style={!isListening ? { borderColor: '#9FC854' } : {}}
             aria-label={isListening ? "Stop listening" : "Start voice input"}
             title={isListening ? "Stop listening" : "Start voice input"}
           >
@@ -156,10 +177,17 @@ const ChatInput: React.FC = () => {
         <Button 
           type="submit" 
           size="icon" 
-          className="bg-[#33C3F0] hover:bg-[#2AB7E2]"
+          className="text-white"
+          style={{ backgroundColor: '#9FC854' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#8AB046';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#9FC854';
+          }}
           disabled={!message.trim()}
         >
-          <Send size={18} className="text-white" />
+          <Send size={18} />
         </Button>
       </form>
     </div>

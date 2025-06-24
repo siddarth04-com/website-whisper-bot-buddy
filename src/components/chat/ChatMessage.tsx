@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MessageType, WeatherData, TravelPreferences } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
@@ -23,29 +22,33 @@ const WeatherCard = ({ data }: { data: WeatherData }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-teal-200">
+    <div className="rounded-lg shadow-sm p-3 mt-2 border"
+         style={{ 
+           backgroundColor: '#E4E8EA', // Porcelain background
+           borderColor: '#9FC854' // Celery border
+         }}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-medium text-teal-600">{data.city}</h3>
+        <h3 className="font-medium" style={{ color: '#9FC854' }}>{data.city}</h3>
         <div className="flex items-center">
           {getWeatherIcon(data.icon)}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div>
-          <p className="text-gray-600">Temperature</p>
-          <p className="font-medium">{data.temp.toFixed(1)}°C</p>
+          <p style={{ color: '#747377' }}>Temperature</p>
+          <p className="font-medium" style={{ color: '#747377' }}>{data.temp.toFixed(1)}°C</p>
         </div>
         <div>
-          <p className="text-gray-600">Condition</p>
-          <p className="font-medium capitalize">{data.description}</p>
+          <p style={{ color: '#747377' }}>Condition</p>
+          <p className="font-medium capitalize" style={{ color: '#747377' }}>{data.description}</p>
         </div>
         <div>
-          <p className="text-gray-600">Humidity</p>
-          <p className="font-medium">{data.humidity}%</p>
+          <p style={{ color: '#747377' }}>Humidity</p>
+          <p className="font-medium" style={{ color: '#747377' }}>{data.humidity}%</p>
         </div>
         <div>
-          <p className="text-gray-600">Wind</p>
-          <p className="font-medium">{data.windSpeed} m/s</p>
+          <p style={{ color: '#747377' }}>Wind</p>
+          <p className="font-medium" style={{ color: '#747377' }}>{data.windSpeed} m/s</p>
         </div>
       </div>
     </div>
@@ -75,16 +78,20 @@ const DestinationRecommendations = ({ message }: { message: string }) => {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-sm p-3 mt-2 border border-teal-200">
+    <div className="rounded-lg shadow-sm p-3 mt-2 border"
+         style={{ 
+           backgroundColor: '#E4E8EA', // Porcelain background
+           borderColor: '#9FC854' // Celery border
+         }}>
       <div className="flex items-center mb-2">
-        <Compass className="text-teal-500 mr-2" size={20} />
-        <h3 className="font-medium text-teal-600">Recommended Destinations</h3>
+        <Compass className="mr-2" size={20} style={{ color: '#9FC854' }} />
+        <h3 className="font-medium" style={{ color: '#9FC854' }}>Recommended Destinations</h3>
       </div>
       <div className="grid grid-cols-1 gap-2 text-sm">
         {destinations.map((destination, index) => (
           <div key={index} className="flex items-center">
-            <MapPin size={16} className="text-gray-400 mr-2" />
-            <p className="font-medium">{destination}</p>
+            <MapPin size={16} className="mr-2" style={{ color: '#747377' }} />
+            <p className="font-medium" style={{ color: '#747377' }}>{destination}</p>
           </div>
         ))}
       </div>
@@ -168,7 +175,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
     >
       {isBot && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-green-400 flex items-center justify-center mr-2 flex-shrink-0">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0"
+             style={{ backgroundColor: '#9FC854' }}>
           <img 
             src="/lovable-uploads/26488c0d-314f-44e7-b1b6-913a3e7898d1.png" 
             alt="Bot" 
@@ -180,9 +188,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         className={cn(
           "px-4 py-3 rounded-lg max-w-[80%] shadow-sm relative",
           isBot 
-            ? "bg-white rounded-tl-none border-l-4 border-teal-500" 
-            : "bg-gradient-to-r from-green-100 to-teal-100 rounded-tr-none"
+            ? "rounded-tl-none border-l-4" 
+            : "rounded-tr-none"
         )}
+        style={{
+          backgroundColor: isBot ? '#E4E8EA' : '#385F6B', // Porcelain for bot, William for user
+          borderLeftColor: isBot ? '#9FC854' : undefined, // Celery border for bot
+          color: isBot ? '#747377' : '#ffffff' // Jumbo text for bot, white for user
+        }}
       >
         <p className="text-sm whitespace-pre-line">{message.content}</p>
         
@@ -205,15 +218,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         
         {isBot && (
           <div className="flex items-center justify-between mt-1">
-            <p className="text-xs text-gray-500">Destination Guide</p>
+            <p className="text-xs" style={{ color: '#747377' }}>Destination Guide</p>
             <button 
               onClick={() => generateSpeech(message.content)} 
               className={cn(
                 "p-1 rounded-full transition-colors",
                 isPlaying 
-                  ? "text-teal-600 bg-teal-100" 
-                  : "text-gray-500 hover:bg-gray-100"
+                  ? "bg-opacity-20" 
+                  : "hover:bg-gray-100"
               )}
+              style={{ 
+                color: isPlaying ? '#9FC854' : '#747377',
+                backgroundColor: isPlaying ? '#9FC854' : undefined
+              }}
               aria-label={isPlaying ? "Stop speaking" : "Listen to response"}
               title={isPlaying ? "Stop speaking" : "Listen to response"}
             >
@@ -223,8 +240,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         )}
       </div>
       {!isBot && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-200 to-teal-200 flex items-center justify-center ml-2 flex-shrink-0">
-          <span className="text-teal-700 text-xs">👤</span>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center ml-2 flex-shrink-0"
+             style={{ backgroundColor: '#E4E8EA' }}>
+          <span style={{ color: '#385F6B' }} className="text-xs">👤</span>
         </div>
       )}
     </div>

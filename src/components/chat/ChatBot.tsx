@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,7 +62,7 @@ const ChatBot: React.FC = () => {
   };
 
   const getChatWindowPosition = () => {
-    const baseClasses = "mb-4 rounded-lg shadow-2xl bg-white flex flex-col animate-fade-in resize overflow-hidden min-w-[300px] min-h-[400px] max-w-[600px] max-h-[80vh] transform-gpu transition-all duration-300";
+    const baseClasses = "mb-4 rounded-lg shadow-2xl flex flex-col animate-fade-in resize overflow-hidden min-w-[300px] min-h-[400px] max-w-[600px] max-h-[80vh] transform-gpu transition-all duration-300";
     
     const transform3D = isOpen ? 
       "perspective-1000 rotateX-2 rotateY-2 translateZ-4" : 
@@ -98,7 +97,7 @@ const ChatBot: React.FC = () => {
 
   return (
     <div className={getPositionClasses(position)}>
-      {/* Chat window with 3D effects */}
+      {/* Chat window with new color scheme */}
       {isOpen && (
         <div 
           className={`${getChatWindowPosition()} ${isOpen ? 'animate-3d-float' : ''}`}
@@ -110,13 +109,14 @@ const ChatBot: React.FC = () => {
             transformStyle: 'preserve-3d',
             boxShadow: isOpen ? 
               '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)' : 
-              '0 10px 25px -3px rgba(0, 0, 0, 0.1)'
+              '0 10px 25px -3px rgba(0, 0, 0, 0.1)',
+            backgroundColor: '#E4E8EA' // Porcelain background
           }}
         >
-          {/* Header with 3D gradient and glass effect */}
-          <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white p-4 rounded-t-lg flex justify-between items-center flex-shrink-0 transform-gpu"
+          {/* Header with new color scheme */}
+          <div className="relative text-white p-4 rounded-t-lg flex justify-between items-center flex-shrink-0 transform-gpu"
                style={{
-                 background: 'linear-gradient(135deg, #f97316 0%, #dc2626 50%, #ec4899 100%)',
+                 background: '#385F6B', // William color for header
                  backdropFilter: 'blur(10px)',
                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                  transform: 'translateZ(10px)',
@@ -168,21 +168,14 @@ const ChatBot: React.FC = () => {
             </div>
           </div>
           
-          {/* Resizable content area with 3D depth */}
+          {/* Resizable content area with new background */}
           <ResizablePanelGroup direction="vertical" className="flex-grow transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
             <ResizablePanel defaultSize={80} minSize={30}>
-              {/* Message area with 3D layered background */}
+              {/* Message area with Porcelain background */}
               <div 
                 className="h-full p-4 overflow-y-auto relative"
                 style={{
-                  background: `
-                    linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(239, 68, 68, 0.1) 25%, rgba(236, 72, 153, 0.1) 50%, rgba(251, 146, 60, 0.05) 100%),
-                    radial-gradient(circle at 25% 25%, rgba(251, 146, 60, 0.15) 0%, transparent 50%),
-                    radial-gradient(circle at 75% 75%, rgba(239, 68, 68, 0.15) 0%, transparent 50%)
-                  `,
-                  backgroundImage: `
-                    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 15l15 30H15z' fill='%23f97316' fill-opacity='0.08' transform='rotate(15 30 30)'/%3E%3Cpath d='M45 20l10 20H35z' fill='%23dc2626' fill-opacity='0.05' transform='rotate(-15 45 30)'/%3E%3C/svg%3E")
-                  `,
+                  backgroundColor: '#E4E8EA', // Porcelain background
                   transform: 'translateZ(-5px)',
                 }}
               >
@@ -207,23 +200,21 @@ const ChatBot: React.FC = () => {
         </div>
       )}
       
-      {/* 3D Toggle button with enhanced animations */}
+      {/* Floating button with Celery color */}
       <Button
         onClick={toggleChat}
         onMouseEnter={() => setHover3D(true)}
         onMouseLeave={() => setHover3D(false)}
-        className={`rounded-full w-14 h-14 flex items-center justify-center shadow-2xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-500 transform-gpu ${
+        className={`rounded-full w-14 h-14 flex items-center justify-center shadow-2xl transition-all duration-500 transform-gpu ${
           isMoving ? 'animate-3d-flip' : ''
         }`}
         style={{
           transform: get3DButtonTransform(),
           transformStyle: 'preserve-3d',
+          backgroundColor: '#9FC854', // Celery color
           boxShadow: hover3D && !isOpen ? 
-            '0 20px 40px -10px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3)' :
+            '0 20px 40px -10px rgba(159, 200, 84, 0.4), 0 0 20px rgba(159, 200, 84, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3)' :
             '0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
-          background: hover3D && !isOpen ?
-            'linear-gradient(135deg, #f97316 0%, #dc2626 50%, #ec4899 100%)' :
-            'linear-gradient(45deg, #f97316 0%, #dc2626 50%, #ec4899 100%)'
         }}
       >
         <div className="relative z-10">
@@ -243,20 +234,24 @@ const ChatBot: React.FC = () => {
         <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 via-transparent to-transparent opacity-50 pointer-events-none"></div>
       </Button>
       
-      {/* Enhanced guide indicator with 3D effects */}
+      {/* Enhanced guide indicator with new colors */}
       {isMoving && !isOpen && (
         <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 animate-fade-in">
           <div className="relative">
-            <div className="bg-black/90 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap backdrop-blur-sm border border-white/20"
+            <div className="text-white px-4 py-2 rounded-full text-sm whitespace-nowrap backdrop-blur-sm border border-white/20"
                  style={{
+                   backgroundColor: '#385F6B', // William color
                    transform: 'perspective(1000px) rotateX(-10deg) translateZ(10px)',
                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
                  }}>
               🧭 Exploring your website...
             </div>
             {/* 3D arrow pointing down */}
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"
-                 style={{ transform: 'translateZ(5px)' }}></div>
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
+                 style={{ 
+                   borderTopColor: '#385F6B',
+                   transform: 'translateZ(5px)' 
+                 }}></div>
           </div>
         </div>
       )}
