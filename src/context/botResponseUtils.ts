@@ -5,6 +5,7 @@ import { generateDynamicResponse } from './enhancedBotUtils';
 import { searchFlights, searchHotels, formatFlightResults, formatHotelResults } from './flightHotelUtils';
 import { formatMapResponse, generateRouteInfo } from './mapUtils';
 import { getCurrentTravelAlerts, getLiveUpdates, formatTravelAlerts, formatLiveUpdates } from './liveUpdatesUtils';
+import { generateCustomItinerary, formatItineraryResponse } from './itineraryUtils';
 
 // Store conversation history for context
 let conversationHistory: string[] = [];
@@ -24,6 +25,45 @@ export const generateBotResponse = async (
   
   const lowerCaseMsg = userMessage.toLowerCase().trim();
   
+  // Handle itinerary generation requests
+  if (lowerCaseMsg.includes('itinerary') || 
+      lowerCaseMsg.includes('plan my trip') || 
+      lowerCaseMsg.includes('create a plan') ||
+      lowerCaseMsg.includes('travel plan') ||
+      (lowerCaseMsg.includes('plan') && (lowerCaseMsg.includes('day') || lowerCaseMsg.includes('week'))) ||
+      lowerCaseMsg.includes('schedule') ||
+      lowerCaseMsg.includes('custom trip')) {
+    
+    console.log('Handling itinerary generation request');
+    
+    try {
+      const itinerary = generateCustomItinerary(userMessage, travelPreferences);
+      const formattedItinerary = formatItineraryResponse(itinerary);
+      
+      return {
+        message: formattedItinerary,
+        suggestions: [
+          { id: '1', text: 'Modify this itinerary' },
+          { id: '2', text: 'Check flight prices for this trip' },
+          { id: '3', text: 'Find hotels for each destination' },
+          { id: '4', text: 'Weather info for travel dates' }
+        ]
+      };
+    } catch (error) {
+      console.error('Itinerary generation error:', error);
+      
+      return {
+        message: `🗓️ **CUSTOM ITINERARY PLANNER**\n\nI'd love to create a personalized itinerary for your India trip! To build the perfect plan, please provide:\n\n📍 **Destinations:** Which cities/regions interest you?\n📅 **Duration:** How many days do you have?\n🎯 **Interests:** What type of experiences? (culture, adventure, food, relaxation)\n💰 **Budget:** What's your budget range?\n👥 **Travel Style:** Solo, couple, family, or friends?\n\n**Example requests:**\n• "Create a 7-day cultural itinerary for Golden Triangle"\n• "Plan a 10-day adventure trip to Himachal Pradesh"\n• "5-day budget itinerary for Kerala backwaters"\n• "2-week luxury tour of Rajasthan"`,
+        suggestions: [
+          { id: '1', text: 'Create 7-day Golden Triangle itinerary' },
+          { id: '2', text: 'Plan 5-day Kerala backwaters trip' },
+          { id: '3', text: 'Design 10-day Rajasthan heritage tour' },
+          { id: '4', text: 'Build weekend getaway to Goa' }
+        ]
+      };
+    }
+  }
+
   // Handle flight price searches
   if (lowerCaseMsg.includes('flight') && (lowerCaseMsg.includes('price') || lowerCaseMsg.includes('search') || lowerCaseMsg.includes('check'))) {
     console.log('Handling flight search request');
@@ -400,11 +440,11 @@ export const generateBotResponse = async (
   // Default response for unclear queries
   console.log('Using enhanced default response');
   return {
-    message: "🙏 **Namaste! Welcome to Your Enhanced India Travel Assistant!** 🇮🇳\n\nI'm now equipped with advanced features to make your India travel planning seamless:\n\n✈️ **Real-time Flight Prices** - Compare airlines instantly\n🏨 **Hotel Search** - Find perfect stays within budget\n🗺️ **Interactive Maps** - Routes, attractions & navigation\n📡 **Live Updates** - Weather, transport & travel alerts\n🎯 **Smart Recommendations** - Personalized based on your style\n🌤️ **Weather Forecasts** - Plan with current conditions\n\n**Try these enhanced features:**\n• \"Flight prices from Delhi to Goa\"\n• \"Hotels in Jaipur under ₹3000\"\n• \"Show me map of Kerala attractions\"\n• \"Current travel conditions in Mumbai\"\n\nWhat would you like to explore first?",
+    message: "🙏 **Namaste! Welcome to Your Enhanced India Travel Assistant!** 🇮🇳\n\nI'm now equipped with advanced features to make your India travel planning seamless:\n\n🗓️ **Custom Itineraries** - Personalized day-by-day travel plans\n✈️ **Real-time Flight Prices** - Compare airlines instantly\n🏨 **Hotel Search** - Find perfect stays within budget\n🗺️ **Interactive Maps** - Routes, attractions & navigation\n📡 **Live Updates** - Weather, transport & travel alerts\n🎯 **Smart Recommendations** - Personalized based on your style\n🌤️ **Weather Forecasts** - Plan with current conditions\n\n**Try these enhanced features:**\n• \"Create a 7-day itinerary for Golden Triangle\"\n• \"Plan a 10-day Kerala backwaters trip\"\n• \"Flight prices from Delhi to Goa\"\n• \"Hotels in Jaipur under ₹3000\"\n\nWhat would you like to explore first?",
     suggestions: [
-      { id: '1', text: 'Check flight prices to India' },
-      { id: '2', text: 'Find hotels in my destination' },
-      { id: '3', text: 'Show me live travel updates' },
+      { id: '1', text: 'Create custom itinerary' },
+      { id: '2', text: 'Check flight prices to India' },
+      { id: '3', text: 'Find hotels in my destination' },
       { id: '4', text: 'Popular Indian destinations' }
     ],
   };
