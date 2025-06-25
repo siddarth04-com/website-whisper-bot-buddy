@@ -6,26 +6,20 @@ import { searchFlights, searchHotels, formatFlightResults, formatHotelResults } 
 import { formatMapResponse, generateRouteInfo } from './mapUtils';
 import { getCurrentTravelAlerts, getLiveUpdates, formatTravelAlerts, formatLiveUpdates } from './liveUpdatesUtils';
 import { generateCustomItinerary, formatItineraryResponse } from './itineraryUtils';
-
-// Store conversation history for context
-let conversationHistory: string[] = [];
+import { generateClaudeItinerary } from './claudeItineraryUtils';
 
 export const generateBotResponse = async (
   userMessage: string,
   travelPreferences: TravelPreferences,
-  setWeatherData: (data: WeatherData | null) => void
+  setWeatherData: (data: WeatherData | null) => void,
+  conversationHistory: string[] = [] // Accept conversation history from context
 ): Promise<{ message: string; suggestions: SuggestedReplyType[] }> => {
   console.log('Generating enhanced bot response for:', userMessage);
-  
-  // Add to conversation history
-  conversationHistory.push(userMessage);
-  if (conversationHistory.length > 10) {
-    conversationHistory = conversationHistory.slice(-10); // Keep last 10 messages
-  }
+  console.log('Conversation history:', conversationHistory);
   
   const lowerCaseMsg = userMessage.toLowerCase().trim();
   
-  // Handle itinerary generation requests
+  // Handle itinerary generation requests with Claude AI
   if (lowerCaseMsg.includes('itinerary') || 
       lowerCaseMsg.includes('plan my trip') || 
       lowerCaseMsg.includes('create a plan') ||
@@ -34,14 +28,14 @@ export const generateBotResponse = async (
       lowerCaseMsg.includes('schedule') ||
       lowerCaseMsg.includes('custom trip')) {
     
-    console.log('Handling itinerary generation request');
+    console.log('Handling itinerary generation request with Claude AI');
     
     try {
-      const itinerary = generateCustomItinerary(userMessage, travelPreferences);
-      const formattedItinerary = formatItineraryResponse(itinerary);
+      // Use Claude AI for better itinerary generation
+      const claudeItinerary = await generateClaudeItinerary(userMessage, travelPreferences, conversationHistory);
       
       return {
-        message: formattedItinerary,
+        message: claudeItinerary,
         suggestions: [
           { id: '1', text: 'Modify this itinerary' },
           { id: '2', text: 'Check flight prices for this trip' },
@@ -50,17 +44,47 @@ export const generateBotResponse = async (
         ]
       };
     } catch (error) {
-      console.error('Itinerary generation error:', error);
+      console.error('Claude itinerary generation error:', error);
       
-      return {
-        message: `🗓️ **CUSTOM ITINERARY PLANNER**\n\nI'd love to create a personalized itinerary for your India trip! To build the perfect plan, please provide:\n\n📍 **Destinations:** Which cities/regions interest you?\n📅 **Duration:** How many days do you have?\n🎯 **Interests:** What type of experiences? (culture, adventure, food, relaxation)\n💰 **Budget:** What's your budget range?\n👥 **Travel Style:** Solo, couple, family, or friends?\n\n**Example requests:**\n• "Create a 7-day cultural itinerary for Golden Triangle"\n• "Plan a 10-day adventure trip to Himachal Pradesh"\n• "5-day budget itinerary for Kerala backwaters"\n• "2-week luxury tour of Rajasthan"`,
-        suggestions: [
-          { id: '1', text: 'Create 7-day Golden Triangle itinerary' },
-          { id: '2', text: 'Plan 5-day Kerala backwaters trip' },
-          { id: '3', text: 'Design 10-day Rajasthan heritage tour' },
-          { id: '4', text: 'Build weekend getaway to Goa' }
-        ]
-      };
+      // Fallback to local generation
+      try {
+        const itinerary = generateCustomItinerary(userMessage, travelPreferences);
+        const formattedItinerary = formatItineraryResponse(itinerary);
+        
+        return {
+          message: formattedItinerary,
+          suggestions: [
+            { id: '1', text: 'Modify this itinerary' },
+            { id: '2', text: 'Check flight prices for this trip' },
+            { id: '3', text: 'Find hotels for each destination' },
+            { id: '4', text: 'Weather info for travel dates' }
+          ]
+        };
+      } catch (fallbackError) {
+        console.error('Fallback itinerary generation error:', fallbackError);
+        
+        return {
+          message: `🗓️ **CUSTOM ITINERARY PLANNER**\n\nI'd love to create a personalized itinerary for your India trip! To build the perfect plan, please provide:\n\n📍 **Destinations:** Which cities/regions interest you?\n📅 **Duration:** How many days do you have?\n🎯 **Interests:** What type of experiences? (culture, adventure, food, relaxation)\n💰 **Budget:** What's your budget range?\n👥 **Travel Style:** Solo, couple, family, or friends?\n\n**Example requests:**\n• "Create a 7-day cultural itinerary for Golden Triangle"\n• "Plan a 10-day adventure trip to Himachal Pradesh"\n• "5-day budget itinerary for Kerala backwaters"\n• "2-week luxury tour of Rajasthan"`,
+          suggestions: [
+            { id: '1', text: 'Create 7-day Golden Triangle itinerary' },
+            { id: '2', text: 'Plan 5-day Kerala backwaters trip' },
+            { id: '3', text: 'Design 10-day Rajasthan heritage tour' },
+            { id: '4', text: 'Build weekend getaway to Goa' }
+          ]
+        };
+      }
+    }
+  }
+
+  // Use enhanced dynamic responses for other queries with conversation history
+  if (conversationHistory.length > 0) {
+    try {
+      const dynamicResponse = await generateDynamicResponse(userMessage, conversationHistory, travelPreferences);
+      if (dynamicResponse) {
+        return dynamicResponse;
+      }
+    } catch (error) {
+      console.error('Dynamic response error:', error);
     }
   }
 
@@ -216,18 +240,6 @@ export const generateBotResponse = async (
     };
   }
   
-  // Use enhanced dynamic responses for other queries
-  if (conversationHistory.length > 1) {
-    try {
-      const dynamicResponse = await generateDynamicResponse(userMessage, conversationHistory, travelPreferences);
-      if (dynamicResponse) {
-        return dynamicResponse;
-      }
-    } catch (error) {
-      console.error('Dynamic response error:', error);
-    }
-  }
-
   // Handle specific input messages - exact matching first
   if (lowerCaseMsg === 'popular indian destinations' || lowerCaseMsg === 'popular destinations') {
     console.log('Handling popular Indian destinations request');
@@ -438,9 +450,13 @@ export const generateBotResponse = async (
   }
 
   // Default response for unclear queries
-  console.log('Using enhanced default response');
+  console.log('Using enhanced default response with conversation awareness');
+  const contextualGreeting = conversationHistory.length > 0 
+    ? "Thanks for continuing our conversation! " 
+    : "🙏 **Namaste! Welcome to Your Enhanced India Travel Assistant!** 🇮🇳\n\n";
+    
   return {
-    message: "🙏 **Namaste! Welcome to Your Enhanced India Travel Assistant!** 🇮🇳\n\nI'm now equipped with advanced features to make your India travel planning seamless:\n\n🗓️ **Custom Itineraries** - Personalized day-by-day travel plans\n✈️ **Real-time Flight Prices** - Compare airlines instantly\n🏨 **Hotel Search** - Find perfect stays within budget\n🗺️ **Interactive Maps** - Routes, attractions & navigation\n📡 **Live Updates** - Weather, transport & travel alerts\n🎯 **Smart Recommendations** - Personalized based on your style\n🌤️ **Weather Forecasts** - Plan with current conditions\n\n**Try these enhanced features:**\n• \"Create a 7-day itinerary for Golden Triangle\"\n• \"Plan a 10-day Kerala backwaters trip\"\n• \"Flight prices from Delhi to Goa\"\n• \"Hotels in Jaipur under ₹3000\"\n\nWhat would you like to explore first?",
+    message: `${contextualGreeting}I'm now equipped with advanced AI features to make your India travel planning seamless:\n\n🗓️ **Custom Itineraries** - Personalized day-by-day travel plans\n✈️ **Real-time Flight Prices** - Compare airlines instantly\n🏨 **Hotel Search** - Find perfect stays within budget\n🗺️ **Interactive Maps** - Routes, attractions & navigation\n📡 **Live Updates** - Weather, transport & travel alerts\n🎯 **Smart Recommendations** - Personalized based on your style\n🌤️ **Weather Forecasts** - Plan with current conditions\n\n**Try these enhanced features:**\n• \"Create a 7-day itinerary for Golden Triangle\"\n• \"Plan a 10-day Kerala backwaters trip\"\n• \"Flight prices from Delhi to Goa\"\n• \"Hotels in Jaipur under ₹3000\"\n\nWhat would you like to explore first?",
     suggestions: [
       { id: '1', text: 'Create custom itinerary' },
       { id: '2', text: 'Check flight prices to India' },

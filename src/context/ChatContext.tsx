@@ -1,8 +1,22 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { MessageType, SuggestedReplyType, WeatherData, TravelPreferences, ChatContextType } from './types';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { SuggestedReplyType, TravelPreferences, WeatherData, ChatMessage } from './types';
 import { generateBotResponse } from './botResponseUtils';
-import { updateTravelPreferences } from './preferencesUtils';
+
+interface ChatContextType {
+  messages: ChatMessage[];
+  isOpen: boolean;
+  isLoading: boolean;
+  weatherData: WeatherData | null;
+  travelPreferences: TravelPreferences;
+  conversationHistory: string[]; // Add conversation history to context
+  addMessage: (content: string, isUser: boolean, suggestions?: SuggestedReplyType[]) => void;
+  toggleChat: () => void;
+  setWeatherData: (data: WeatherData | null) => void;
+  updateTravelPreferences: (preferences: Partial<TravelPreferences>) => void;
+  sendMessage: (message: string) => Promise<void>;
+  clearConversation: () => void; // Add clear conversation function
+}
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -14,111 +28,127 @@ export const useChatContext = () => {
   return context;
 };
 
-type Props = {
+interface ChatProviderProps {
   children: ReactNode;
-};
+}
 
-export const ChatProvider: React.FC<Props> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<MessageType[]>([
+export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      content: 'Namaste! 🙏 I\'m your India travel assistant. How can I help you explore the incredible diversity of India today?',
-      sender: 'bot',
+      content: "🙏 **Namaste! Welcome to Nestled Guide!** 🇮🇳\n\nI'm your enhanced AI travel assistant, ready to help you discover incredible India! I can create custom itineraries, find flights & hotels, provide weather updates, and share insider travel tips.\n\n✨ **What I can help you with:**\n• Custom day-by-day itineraries\n• Flight & hotel recommendations\n• Weather forecasts\n• Cultural insights & travel tips\n• Budget planning\n\nWhat kind of India adventure are you planning?",
+      isUser: false,
       timestamp: new Date(),
-    },
+      suggestions: [
+        { id: '1', text: 'Create a 7-day Golden Triangle itinerary' },
+        { id: '2', text: 'Plan a Kerala backwaters trip' },
+        { id: '3', text: 'Budget travel tips for India' },
+        { id: '4', text: 'Popular Indian destinations' }
+      ]
+    }
   ]);
-  const [suggestedReplies, setSuggestedReplies] = useState<SuggestedReplyType[]>([
-    { id: '1', text: 'Popular Indian destinations' },
-    { id: '2', text: 'India travel packages' },
-    { id: '3', text: 'India travel tips' },
-  ]);
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [travelPreferences, setTravelPreferences] = useState<TravelPreferences>({});
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  const [travelPreferences, setTravelPreferences] = useState<TravelPreferences>({
+    budget: 'medium',
+    genre: 'cultural',
+    style: 'family'
+  });
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const closeChat = () => {
-    setIsOpen(false);
-  };
-
-  const sendMessage = (content: string) => {
-    if (!content.trim()) return;
-    
-    console.log('Sending message:', content);
-    
-    // Add user message
-    const userMessage: MessageType = {
+  const addMessage = useCallback((content: string, isUser: boolean, suggestions?: SuggestedReplyType[]) => {
+    const newMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
-      sender: 'user',
+      isUser,
       timestamp: new Date(),
+      suggestions: suggestions || []
     };
     
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, newMessage]);
     
-    // Clear suggested replies temporarily
-    setSuggestedReplies([]);
-    
-    // Update travel preferences based on the message
-    updateTravelPreferences(content, setTravelPreferences);
-    
-    // Simulate bot thinking
-    setTimeout(async () => {
-      try {
-        const { message, suggestions } = await generateBotResponse(content, travelPreferences, setWeatherData);
-        
-        console.log('Bot response generated:', message);
-        console.log('New suggestions:', suggestions);
-        
-        // Add bot response
-        const botMessage: MessageType = {
-          id: (Date.now() + 1).toString(),
-          content: message,
-          sender: 'bot',
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, botMessage]);
-        setSuggestedReplies(suggestions);
-      } catch (error) {
-        console.error('Error generating bot response:', error);
-        
-        // Fallback response in case of error
-        const errorMessage: MessageType = {
-          id: (Date.now() + 1).toString(),
-          content: "I apologize, but I'm having trouble processing your request right now. Please try asking about Indian destinations, travel tips, or weather information!",
-          sender: 'bot',
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, errorMessage]);
-        setSuggestedReplies([
-          { id: '1', text: 'Popular Indian destinations' },
-          { id: '2', text: 'India travel tips' },
-          { id: '3', text: 'Budget travel in India' },
-        ]);
-      }
-    }, 1000);
-  };
+    // Update conversation history
+    if (isUser) {
+      setConversationHistory(prev => {
+        const updated = [...prev, content];
+        return updated.length > 15 ? updated.slice(-15) : updated; // Keep last 15 messages
+      });
+    }
+  }, []);
 
-  const value = {
-    isOpen,
+  const clearConversation = useCallback(() => {
+    setMessages([{
+      id: '1',
+      content: "🙏 **Namaste! Welcome to Nestled Guide!** 🇮🇳\n\nI'm your enhanced AI travel assistant, ready to help you discover incredible India! I can create custom itineraries, find flights & hotels, provide weather updates, and share insider travel tips.\n\n✨ **What I can help you with:**\n• Custom day-by-day itineraries\n• Flight & hotel recommendations\n• Weather forecasts\n• Cultural insights & travel tips\n• Budget planning\n\nWhat kind of India adventure are you planning?",
+      isUser: false,
+      timestamp: new Date(),
+      suggestions: [
+        { id: '1', text: 'Create a 7-day Golden Triangle itinerary' },
+        { id: '2', text: 'Plan a Kerala backwaters trip' },
+        { id: '3', text: 'Budget travel tips for India' },
+        { id: '4', text: 'Popular Indian destinations' }
+      ]
+    }]);
+    setConversationHistory([]);
+  }, []);
+
+  const toggleChat = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
+
+  const updateTravelPreferences = useCallback((preferences: Partial<TravelPreferences>) => {
+    setTravelPreferences(prev => ({ ...prev, ...preferences }));
+  }, []);
+
+  const sendMessage = useCallback(async (message: string) => {
+    if (!message.trim()) return;
+
+    // Add user message
+    addMessage(message, true);
+    setIsLoading(true);
+
+    try {
+      // Pass conversation history to generateBotResponse
+      const response = await generateBotResponse(
+        message, 
+        travelPreferences, 
+        setWeatherData,
+        conversationHistory // Pass conversation history
+      );
+      
+      // Add bot response
+      addMessage(response.message, false, response.suggestions);
+    } catch (error) {
+      console.error('Error generating bot response:', error);
+      addMessage(
+        "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
+        false
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addMessage, travelPreferences, conversationHistory]);
+
+  const value: ChatContextType = {
     messages,
-    suggestedReplies,
-    toggleChat,
-    sendMessage,
-    closeChat,
+    isOpen,
+    isLoading,
     weatherData,
     travelPreferences,
+    conversationHistory,
+    addMessage,
+    toggleChat,
+    setWeatherData,
+    updateTravelPreferences,
+    sendMessage,
+    clearConversation
   };
 
-  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
+  return (
+    <ChatContext.Provider value={value}>
+      {children}
+    </ChatContext.Provider>
+  );
 };
-
-export default ChatProvider;
-
-// Re-export types for backward compatibility
-export type { MessageType, SuggestedReplyType, WeatherData, TravelPreferences };
