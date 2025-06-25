@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { MessageType, WeatherData, TravelPreferences } from '../../context/ChatContext';
 import { cn } from '@/lib/utils';
 import { Cloud, Sun, CloudSun, CloudRain, Wind, Volume2, VolumeX, Compass, MapPin } from 'lucide-react';
-import { useConversation } from '@11labs/react';
 
 interface ChatMessageProps {
   message: MessageType;

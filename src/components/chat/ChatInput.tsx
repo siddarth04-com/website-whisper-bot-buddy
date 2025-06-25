@@ -111,7 +111,7 @@ const ChatInput: React.FC = () => {
            borderTopColor: '#9FC854' // Celery border
          }}>
       {/* Suggested replies with new colors */}
-      {suggestedReplies.length > 0 && (
+      {suggestedReplies && suggestedReplies.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {suggestedReplies.map((reply) => (
             <button
